@@ -1,0 +1,2540 @@
+[
+  {
+    "id": "std-1",
+    "nis": "3104161443",
+    "nisn": "3104161443",
+    "name": "ABIMANA HIDAYA JATI",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-2",
+    "nis": "3106614120",
+    "nisn": "3106614120",
+    "name": "AHMAD AZAM MUSYAFFA",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-3",
+    "nis": "0109321868",
+    "nisn": "0109321868",
+    "name": "AMIRAH YASMIN MUMTAZA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-4",
+    "nis": "0102652190",
+    "nisn": "0102652190",
+    "name": "APRISYA GICELLA KRISWINDARTI",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-5",
+    "nis": "0111126673",
+    "nisn": "0111126673",
+    "name": "AULIYA AGUSTINA RAMADHANI",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-6",
+    "nis": "0106698084",
+    "nisn": "0106698084",
+    "name": "BALQIS AL FALAHNI",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-7",
+    "nis": "0105565319",
+    "nisn": "0105565319",
+    "name": "CAHAYA BILQIS AZZAHRA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-8",
+    "nis": "0108285355",
+    "nisn": "0108285355",
+    "name": "CLARISSA EKA DAMAYANTI",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-9",
+    "nis": "0107807424",
+    "nisn": "0107807424",
+    "name": "Dea Noviyanti",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-10",
+    "nis": "0109992813",
+    "nisn": "0109992813",
+    "name": "DEWITA TRI RAHAYU",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-11",
+    "nis": "0106391109",
+    "nisn": "0106391109",
+    "name": "Dianika Cheryl Rodiati Lahudin",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-12",
+    "nis": "0104357333",
+    "nisn": "0104357333",
+    "name": "FENI LOLITA OKTAVIA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-13",
+    "nis": "0118056415",
+    "nisn": "0118056415",
+    "name": "HIKMA FIRDA NUR CHOIRUN NISA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-14",
+    "nis": "0117033683",
+    "nisn": "0117033683",
+    "name": "KIRANA SHAFAA SALSABILA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-15",
+    "nis": "0115137959",
+    "nisn": "0115137959",
+    "name": "LIA NUR JANAH",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-16",
+    "nis": "3103607271",
+    "nisn": "3103607271",
+    "name": "MASLAKHA AYU AS'ARI",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-17",
+    "nis": "0117936465",
+    "nisn": "0117936465",
+    "name": "MISHCARA FAUZIYA AZKADINA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-18",
+    "nis": "0114109726",
+    "nisn": "0114109726",
+    "name": "MOH ARIL ADITTIA AFRI ANSYAH",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-19",
+    "nis": "0107514057",
+    "nisn": "0107514057",
+    "name": "MUHAMAD DERYEL AZZHURO HARDIAN",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-20",
+    "nis": "0108167406",
+    "nisn": "0108167406",
+    "name": "MUHAMMAD AMRIL ALDIANSYAH",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-21",
+    "nis": "0117561876",
+    "nisn": "0117561876",
+    "name": "MUHAMMAD AXEL ANANDA",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-22",
+    "nis": "0102147553",
+    "nisn": "0102147553",
+    "name": "MUHAMMAD FIKRI ARGA DANISWARA",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-23",
+    "nis": "0115183187",
+    "nisn": "0115183187",
+    "name": "MUHAMMAD NIZAM PRATAMA",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-24",
+    "nis": "0116374045",
+    "nisn": "0116374045",
+    "name": "MUHAMMAD RAFA PUTRA ANWARI",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-25",
+    "nis": "0065480026",
+    "nisn": "0065480026",
+    "name": "Nabila Izza Azzahrah",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-26",
+    "nis": "0104159201",
+    "nisn": "0104159201",
+    "name": "NABILA NAURA RIZQI AULIA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-27",
+    "nis": "0105216833",
+    "nisn": "0105216833",
+    "name": "RASYA ANINDYA PUTRA YUDHA",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-28",
+    "nis": "0111315607",
+    "nisn": "0111315607",
+    "name": "RIF'AT KHARIDAH SYALABIYYAH",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-29",
+    "nis": "0115272665",
+    "nisn": "0115272665",
+    "name": "SALSABILA AULIA PUTRI PRASETYO",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-30",
+    "nis": "0103200536",
+    "nisn": "0103200536",
+    "name": "SEFTI GEA ARISYA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-31",
+    "nis": "0106392903",
+    "nisn": "0106392903",
+    "name": "SHAKILLANAURA KHEYZA ADIFA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-32",
+    "nis": "0096044437",
+    "nisn": "0096044437",
+    "name": "SITI NOVITA RAHMANIA",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-33",
+    "nis": "0118305896",
+    "nisn": "0118305896",
+    "name": "TIARA OKTAVIA PERTIWI",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-34",
+    "nis": "0114280265",
+    "nisn": "0114280265",
+    "name": "ZAVINA EKA PUTRI",
+    "gender": "P",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-35",
+    "nis": "0102693941",
+    "nisn": "0102693941",
+    "name": "ZIHNI NURUDDIN PARVEZ",
+    "gender": "L",
+    "className": "X-1",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-36",
+    "nis": "0102705982",
+    "nisn": "0102705982",
+    "name": "ACHMAD ABIMANYU",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-37",
+    "nis": "0116168404",
+    "nisn": "0116168404",
+    "name": "ADELIA RIZKY CHINTYA",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-38",
+    "nis": "0105125757",
+    "nisn": "0105125757",
+    "name": "AISHA BALQIS DEWI RAMADHANI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-39",
+    "nis": "0107889991",
+    "nisn": "0107889991",
+    "name": "ALYA PUTRI MASLIHAH",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-40",
+    "nis": "0111842400",
+    "nisn": "0111842400",
+    "name": "AMABEL AULIA PUTRI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-41",
+    "nis": "0119763416",
+    "nisn": "0119763416",
+    "name": "ANANDA MEYTHA SYAFITRI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-42",
+    "nis": "0105396952",
+    "nisn": "0105396952",
+    "name": "AS-SHIFAA'NUR JANNAH",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-43",
+    "nis": "0103567937",
+    "nisn": "0103567937",
+    "name": "AVINDA DWI PUSPITA",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-44",
+    "nis": "0104207212",
+    "nisn": "0104207212",
+    "name": "DAFIYA AJENG PERMAYDANI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-45",
+    "nis": "3109583924",
+    "nisn": "3109583924",
+    "name": "DECHA PUTRI AYU DEVANI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-46",
+    "nis": "0108777926",
+    "nisn": "0108777926",
+    "name": "DHIYAN ALINA AFRIYANI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-47",
+    "nis": "0119445205",
+    "nisn": "0119445205",
+    "name": "Dinda Reisyafa Azzahra",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-48",
+    "nis": "0113490214",
+    "nisn": "0113490214",
+    "name": "FACHRI AHMAD MAULANA YUSUF",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-49",
+    "nis": "0111046027",
+    "nisn": "0111046027",
+    "name": "FENITA PRESTANTI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-50",
+    "nis": "0101651505",
+    "nisn": "0101651505",
+    "name": "FIRDA SHOFA NURIL IZA",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-51",
+    "nis": "0118216091",
+    "nisn": "0118216091",
+    "name": "KHANZA AULIA HARIYADI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-52",
+    "nis": "0119890836",
+    "nisn": "0119890836",
+    "name": "KIRANI AISHA VIRDAUSY",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-53",
+    "nis": "0102950370",
+    "nisn": "0102950370",
+    "name": "LUNA CALYSTA",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-54",
+    "nis": "0109634411",
+    "nisn": "0109634411",
+    "name": "MAHESA IFAN SAPUTRA",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-55",
+    "nis": "0105484228",
+    "nisn": "0105484228",
+    "name": "MANGGALA HUGO ARGANSYAH",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-56",
+    "nis": "0084766595",
+    "nisn": "0084766595",
+    "name": "MOHAMMAD FAREL ARDHITYA",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-57",
+    "nis": "0117822644",
+    "nisn": "0117822644",
+    "name": "MUHAMMAD NABIL AL GHAZALI",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-58",
+    "nis": "0115867282",
+    "nisn": "0115867282",
+    "name": "MYTHA KIRANA LADY AISYAH",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-59",
+    "nis": "0105031896",
+    "nisn": "0105031896",
+    "name": "NEVAN JAHFA ARILZA",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-60",
+    "nis": "0112633239",
+    "nisn": "0112633239",
+    "name": "Rahmad Yanuar Vidianto",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-61",
+    "nis": "3100963428",
+    "nisn": "3100963428",
+    "name": "RESTIAWAN PRIAMBODHO PUTRA HARTAWAN",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-62",
+    "nis": "0109397338",
+    "nisn": "0109397338",
+    "name": "RISKA AMELIA FARADILA",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-63",
+    "nis": "0119086120",
+    "nisn": "0119086120",
+    "name": "RIZKY ADITYA PUTRA",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-64",
+    "nis": "0107395976",
+    "nisn": "0107395976",
+    "name": "SALSABELLA AYU ANDINI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-65",
+    "nis": "0118798824",
+    "nisn": "0118798824",
+    "name": "SAYFA YUVELIN AQILA REFA",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-66",
+    "nis": "0103732707",
+    "nisn": "0103732707",
+    "name": "SYIFA'DAWAM ASSYAUQI",
+    "gender": "L",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-67",
+    "nis": "0106822610",
+    "nisn": "0106822610",
+    "name": "Vanessa Berliana Putri",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-68",
+    "nis": "0114401713",
+    "nisn": "0114401713",
+    "name": "WIJI NUR WAHYUNI",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-69",
+    "nis": "0113289310",
+    "nisn": "0113289310",
+    "name": "ZELMA ATHALIA CERYL",
+    "gender": "P",
+    "className": "X-2",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-70",
+    "nis": "0116337231",
+    "nisn": "0116337231",
+    "name": "ACHMAD DANIZH ZIDANE PRATAMA",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-71",
+    "nis": "3100027022",
+    "nisn": "3100027022",
+    "name": "AHMAD NASWAN ALFARIS",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-72",
+    "nis": "0104510616",
+    "nisn": "0104510616",
+    "name": "ALDIANSYAH PUTRA MAULANA",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-73",
+    "nis": "0106708343",
+    "nisn": "0106708343",
+    "name": "ALFIANSYAH ICHSANUDIN WIJAYA",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-74",
+    "nis": "0118063516",
+    "nisn": "0118063516",
+    "name": "AMALIA FAJRINA FALAQ",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-75",
+    "nis": "0119518967",
+    "nisn": "0119518967",
+    "name": "AMIRA LATIFATUZ ZAHRA",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-76",
+    "nis": "0106869814",
+    "nisn": "0106869814",
+    "name": "ANANDA NUR ARIFAH",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-77",
+    "nis": "0112013080",
+    "nisn": "0112013080",
+    "name": "ANDHINI DWI PUTRI ARIFFIANTO",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-78",
+    "nis": "0101394150",
+    "nisn": "0101394150",
+    "name": "CALLYSTA FALERIN KHASANAH DESTA",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-79",
+    "nis": "0118550536",
+    "nisn": "0118550536",
+    "name": "CHILA INDRA LIVIA PUTRI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-80",
+    "nis": "0102962982",
+    "nisn": "0102962982",
+    "name": "DWI UMI YULIANTI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-81",
+    "nis": "0115930864",
+    "nisn": "0115930864",
+    "name": "GYOVANDI REHANSYAH",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-82",
+    "nis": "0109196676",
+    "nisn": "0109196676",
+    "name": "HANI NUR FADILAH",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-83",
+    "nis": "0112931591",
+    "nisn": "0112931591",
+    "name": "KANAYA FAHMIDA MAHARANI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-84",
+    "nis": "0116347017",
+    "nisn": "0116347017",
+    "name": "KEYLA SYALABIYYA AZELIA RIFTA",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-85",
+    "nis": "0108093302",
+    "nisn": "0108093302",
+    "name": "KHRISNA FERDIANSYAH RAMADHANI",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-86",
+    "nis": "0115631658",
+    "nisn": "0115631658",
+    "name": "LINTANG KINANTI HABIBAH TAMAM",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-87",
+    "nis": "0107879773",
+    "nisn": "0107879773",
+    "name": "M. FAIZ RAFI'I SYAHLA SYAWAL",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-88",
+    "nis": "0114581526",
+    "nisn": "0114581526",
+    "name": "MANGGALA PRABASWARA",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-89",
+    "nis": "0106054580",
+    "nisn": "0106054580",
+    "name": "NABILA SASKIYA TARTILA",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-90",
+    "nis": "0106293624",
+    "nisn": "0106293624",
+    "name": "NAFFA ARYA RIZYANA",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-91",
+    "nis": "0109047881",
+    "nisn": "0109047881",
+    "name": "NAILA IZZA RAMADHANI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-92",
+    "nis": "0107078945",
+    "nisn": "0107078945",
+    "name": "NAURAH AQILAH SALSABILA",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-93",
+    "nis": "0106963063",
+    "nisn": "0106963063",
+    "name": "NAZRUL PRAWIRA",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-94",
+    "nis": "0118515288",
+    "nisn": "0118515288",
+    "name": "NUR LAILA RAHMADANI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-95",
+    "nis": "0104617726",
+    "nisn": "0104617726",
+    "name": "PUAN MAHARANI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-96",
+    "nis": "0113280283",
+    "nisn": "0113280283",
+    "name": "RATNA DWI ANGGRAINI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-97",
+    "nis": "0108448152",
+    "nisn": "0108448152",
+    "name": "RIZKI RADITYA KUSWADI",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-98",
+    "nis": "0113772329",
+    "nisn": "0113772329",
+    "name": "SABRYNA ZALSILVIKA ANSALWA",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-99",
+    "nis": "0109366640",
+    "nisn": "0109366640",
+    "name": "SAKINA ISNAINI AL-IKHROMAH",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-100",
+    "nis": "0109951829",
+    "nisn": "0109951829",
+    "name": "SILVI DWI ARINA",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-101",
+    "nis": "0111529776",
+    "nisn": "0111529776",
+    "name": "TSABITAH NUR RAFAH",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-102",
+    "nis": "0112276752",
+    "nisn": "0112276752",
+    "name": "VANO NUGI FIRMANSYAH",
+    "gender": "L",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-103",
+    "nis": "0113664473",
+    "nisn": "0113664473",
+    "name": "VIZCARRA DWI NURAINI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-104",
+    "nis": "0114420300",
+    "nisn": "0114420300",
+    "name": "WURI DIAN ITSAR PRATIWI",
+    "gender": "P",
+    "className": "X-3",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-105",
+    "nis": "3118614529",
+    "nisn": "3118614529",
+    "name": "ABDUL MU'ID AGHOLIA",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-106",
+    "nis": "0108750673",
+    "nisn": "0108750673",
+    "name": "ALMIRAH SOPHIA AZARIA TSANY",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-107",
+    "nis": "0104832140",
+    "nisn": "0104832140",
+    "name": "AULIA JUNIAR PURWARDANI",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-108",
+    "nis": "0111720427",
+    "nisn": "0111720427",
+    "name": "AZ ZAHRA FILZAH",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-109",
+    "nis": "0108445792",
+    "nisn": "0108445792",
+    "name": "BERRY PARINIBBANA RAHADIAN",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-110",
+    "nis": "3103707053",
+    "nisn": "3103707053",
+    "name": "BINTANG TIARA NOVALIA ANANDA",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-111",
+    "nis": "0114717561",
+    "nisn": "0114717561",
+    "name": "Citra Yunita Sari",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-112",
+    "nis": "0105098605",
+    "nisn": "0105098605",
+    "name": "DEBITA SAVANA ZARINI",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-113",
+    "nis": "0119277072",
+    "nisn": "0119277072",
+    "name": "ERISA ARINDRA CECILIA",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-114",
+    "nis": "0108391909",
+    "nisn": "0108391909",
+    "name": "Fadhira Alya May Cahyani",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-115",
+    "nis": "0115326350",
+    "nisn": "0115326350",
+    "name": "INTAN KIRANA WARDHANI",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-116",
+    "nis": "0117829180",
+    "nisn": "0117829180",
+    "name": "JELITA SYLVIA",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-117",
+    "nis": "3114832718",
+    "nisn": "3114832718",
+    "name": "JILAN MUMTAZ ZAHIRAH",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-118",
+    "nis": "0105274056",
+    "nisn": "0105274056",
+    "name": "KEISHA PUTRI AURISWANTI",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-119",
+    "nis": "0111265444",
+    "nisn": "0111265444",
+    "name": "KEISYA EKA PUTRI ALMIRA",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-120",
+    "nis": "0104328119",
+    "nisn": "0104328119",
+    "name": "MAHESA AGNY PUTRA PRABOWO",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-121",
+    "nis": "0103978017",
+    "nisn": "0103978017",
+    "name": "MAULA PUTRI MASLIHATIN",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-122",
+    "nis": "3111903673",
+    "nisn": "3111903673",
+    "name": "MUHAMMAD FAIRUZUL WAFI FARADIS",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-123",
+    "nis": "0109603527",
+    "nisn": "0109603527",
+    "name": "MUHAMMAD SYAHRUL ZAKIYAH",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-124",
+    "nis": "0106487042",
+    "nisn": "0106487042",
+    "name": "MUTIARA RISTY NUR AZIZAH",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-125",
+    "nis": "3096750265",
+    "nisn": "3096750265",
+    "name": "NADIRA ECHA NURAINI",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-126",
+    "nis": "0105698890",
+    "nisn": "0105698890",
+    "name": "NUR AZZAM DARUSSALAM",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-127",
+    "nis": "0116640326",
+    "nisn": "0116640326",
+    "name": "NUR IZZAH ZAHIRA",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-128",
+    "nis": "0106923836",
+    "nisn": "0106923836",
+    "name": "NURIS ZUHROTUS SA'ADAH",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-129",
+    "nis": "0108449190",
+    "nisn": "0108449190",
+    "name": "OCTA FERDIANSYAH PUTRA",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-130",
+    "nis": "0101447068",
+    "nisn": "0101447068",
+    "name": "RADITYA VINO HIDAYATULLAH",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-131",
+    "nis": "0112824883",
+    "nisn": "0112824883",
+    "name": "RAFA NIZAM AL-KHAFIDZ",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-132",
+    "nis": "0113485196",
+    "nisn": "0113485196",
+    "name": "RENDY DWI FIRMANSYAH",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-133",
+    "nis": "0114244376",
+    "nisn": "0114244376",
+    "name": "Reva Fidela Lathifah",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-134",
+    "nis": "0118938736",
+    "nisn": "0118938736",
+    "name": "SABRINA AZ-ZAHRA",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-135",
+    "nis": "0112516212",
+    "nisn": "0112516212",
+    "name": "SIIRIIN MAHDIYAH",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-136",
+    "nis": "0108944314",
+    "nisn": "0108944314",
+    "name": "SIRRUL MALIH",
+    "gender": "L",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-137",
+    "nis": "0108300070",
+    "nisn": "0108300070",
+    "name": "SITI FATIMAH AZZAHRA",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-138",
+    "nis": "0107457775",
+    "nisn": "0107457775",
+    "name": "WIKE TRI CAHYANTI",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-139",
+    "nis": "0115302385",
+    "nisn": "0115302385",
+    "name": "YASMIN MUNTAS",
+    "gender": "P",
+    "className": "X-4",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-140",
+    "nis": "11765",
+    "nisn": "11765",
+    "name": "ADINDA BILQIS ANNAZWA",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-141",
+    "nis": "11695",
+    "nisn": "11695",
+    "name": "AHMAD GATHFAN TAZAKKA EFENDI",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-142",
+    "nis": "11655",
+    "nisn": "11655",
+    "name": "AISYAH NATHA HARYANTO",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-143",
+    "nis": "11888",
+    "nisn": "11888",
+    "name": "ALDO MEI SUCHRISTIAWAN",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-144",
+    "nis": "11843",
+    "nisn": "11843",
+    "name": "ANDIKA DABLI DAMARKENCONO",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-145",
+    "nis": "11991",
+    "nisn": "11991",
+    "name": "DENAYU LINTANG ZHAFEERA ZAHRA",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-146",
+    "nis": "11923",
+    "nisn": "11923",
+    "name": "DONYTA OKTAVIANI",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-147",
+    "nis": "11955",
+    "nisn": "11955",
+    "name": "ELNINO WISNU AJI",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-148",
+    "nis": "11925",
+    "nisn": "11925",
+    "name": "ELVARETTA ANINDYA KALYCA ATHAILLAH",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-149",
+    "nis": "11853",
+    "nisn": "11853",
+    "name": "FARESA OKTAVIA ANGGRAINI",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-150",
+    "nis": "12067",
+    "nisn": "12067",
+    "name": "GWEN AISYA KIRANA",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-151",
+    "nis": "11670",
+    "nisn": "11670",
+    "name": "IBRAHIM THREESTAN DIMAS SWANDARU",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-152",
+    "nis": "11713",
+    "nisn": "11713",
+    "name": "KEISA NABILA AZZAHRA",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-153",
+    "nis": "11929",
+    "nisn": "11929",
+    "name": "KEVIN ADITYA HANAFI PUTRA",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-154",
+    "nis": "11997",
+    "nisn": "11997",
+    "name": "KEYCELO ZADA JOHAN",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-155",
+    "nis": "11888",
+    "nisn": "11888",
+    "name": "LUNGGA SUHASDRA",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-156",
+    "nis": "11716",
+    "nisn": "11716",
+    "name": "MAR'ATUS SHALEKHA RAKHMADANI",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-157",
+    "nis": "11747",
+    "nisn": "11747",
+    "name": "MAYLA ULUL AZMI",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-158",
+    "nis": "12004",
+    "nisn": "12004",
+    "name": "MOCH. IRFAN ALFARIZI",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-159",
+    "nis": "11891",
+    "nisn": "11891",
+    "name": "MOCH. RIDHO ABADI",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-160",
+    "nis": "12040",
+    "nisn": "12040",
+    "name": "MOCHAMMAD ADAM GIFFARY",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-161",
+    "nis": "11965",
+    "nisn": "11965",
+    "name": "MOH. FATHIR RIFATULLAH",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-162",
+    "nis": "11674",
+    "nisn": "11674",
+    "name": "MOHAMMAD NAZRIEL AHNAF FAIRUZ",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-163",
+    "nis": "11934",
+    "nisn": "11934",
+    "name": "MUHAMMAD AMIRULLAH FAIDZIN",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-164",
+    "nis": "11676",
+    "nisn": "11676",
+    "name": "MUHAMMAD AZZAM HAIZ MUZAKKI",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-165",
+    "nis": "11752",
+    "nisn": "11752",
+    "name": "MUHAMMAD SAPUTRA RAMADHANI",
+    "gender": "L",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-166",
+    "nis": "11788",
+    "nisn": "11788",
+    "name": "NATASYA AMANDA SAFIRA",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-167",
+    "nis": "12044",
+    "nisn": "12044",
+    "name": "NAYSYILA ZIFA ROSYITA",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-168",
+    "nis": "11898",
+    "nisn": "11898",
+    "name": "NURFA ARIANTI A'MALIATUL HASANAH",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-169",
+    "nis": "11789",
+    "nisn": "11789",
+    "name": "PUTRI APRILIA HADIARTI",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-170",
+    "nis": "11790",
+    "nisn": "11790",
+    "name": "QONITAH ANINDYA PUTRI",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-171",
+    "nis": "11723",
+    "nisn": "11723",
+    "name": "REGITA DWI CAHYANI",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-172",
+    "nis": "11940",
+    "nisn": "11940",
+    "name": "SELVI NUR FADHILAH",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-173",
+    "nis": "12086",
+    "nisn": "12086",
+    "name": "WAFIQ ISLAMIA",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-174",
+    "nis": "11798",
+    "nisn": "11798",
+    "name": "YASMIN NUR AZ ZAHRA",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-175",
+    "nis": "11837",
+    "nisn": "11837",
+    "name": "ZAHWA ATHAILAH AMIN",
+    "gender": "P",
+    "className": "XII-9",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-176",
+    "nis": "11656",
+    "nisn": "11656",
+    "name": "AKBAR FIRLY ERLANGGA",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-177",
+    "nis": "11732",
+    "nisn": "11732",
+    "name": "ALFINNADIA LINABILA AFANDINI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-178",
+    "nis": "11806",
+    "nisn": "11806",
+    "name": "AR ANGGIA ZERANATHA ZAHRO",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-179",
+    "nis": "11769",
+    "nisn": "11769",
+    "name": "AULIA AMANDA ZALFA",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-180",
+    "nis": "11770",
+    "nisn": "11770",
+    "name": "AULIA PUTRI RAMADHANI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-181",
+    "nis": "11699",
+    "nisn": "11699",
+    "name": "AURELLIA DWI MAHESWARI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-182",
+    "nis": "11701",
+    "nisn": "11701",
+    "name": "CITRA AYU LESTARI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-183",
+    "nis": "11735",
+    "nisn": "11735",
+    "name": "CITRA MAHESTI HIDAYAT",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-184",
+    "nis": "11736",
+    "nisn": "11736",
+    "name": "DAFFAQ DIFFULLOH KHUSNI",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-185",
+    "nis": "11812",
+    "nisn": "11812",
+    "name": "DESY DWI RATNA TUNGGA DEWI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-186",
+    "nis": "11703",
+    "nisn": "11703",
+    "name": "ELENA HALIMATUS SAKDIAH",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-187",
+    "nis": "11705",
+    "nisn": "11705",
+    "name": "ELOK RIZQIYAH ROFIQOH",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-188",
+    "nis": "11814",
+    "nisn": "11814",
+    "name": "ERINA AURELLIA PUTRI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-189",
+    "nis": "11706",
+    "nisn": "11706",
+    "name": "FAIZZATURRAHMA ARYANTI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-190",
+    "nis": "11669",
+    "nisn": "11669",
+    "name": "FARIQ ALVIN PRASETYA",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-191",
+    "nis": "11774",
+    "nisn": "11774",
+    "name": "FEBRIYANA PUTRI ROSADI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-192",
+    "nis": "11775",
+    "nisn": "11775",
+    "name": "FIONNA ANITA KIREINA",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-193",
+    "nis": "11818",
+    "nisn": "11818",
+    "name": "ISFINA HABIBATUL MAULA",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-194",
+    "nis": "11710",
+    "nisn": "11710",
+    "name": "IVANDER FARRELINO MOHAN",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-195",
+    "nis": "11776",
+    "nisn": "11776",
+    "name": "JASYIKA AURA ARRISQIYAH",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-196",
+    "nis": "11780",
+    "nisn": "11780",
+    "name": "M. FIRMAN MARDIANSYAH",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-197",
+    "nis": "11715",
+    "nisn": "11715",
+    "name": "MAHARGYA DINDA PUTRI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-198",
+    "nis": "11823",
+    "nisn": "11823",
+    "name": "MARCELLO BRAGA PRATAMA YODHA",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-199",
+    "nis": "11748",
+    "nisn": "11748",
+    "name": "MEIDIHARTHA BRAMASTHARA PRABOWO",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-200",
+    "nis": "11783",
+    "nisn": "11783",
+    "name": "MUHAMMAD MUKHLIS RACHMADANI",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-201",
+    "nis": "11678",
+    "nisn": "11678",
+    "name": "MUHAMMAD RADITYA ABHISYEKA PUTRA",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-202",
+    "nis": "11784",
+    "nisn": "11784",
+    "name": "MUHAMMAD RASYA AURA AKHSANI",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-203",
+    "nis": "11753",
+    "nisn": "11753",
+    "name": "NABILAH CHERIL CHANDRANINGTYAS",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-204",
+    "nis": "11680",
+    "nisn": "11680",
+    "name": "NADINE HANATA SURYA",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-205",
+    "nis": "11754",
+    "nisn": "11754",
+    "name": "NAJWA IZZATUL ULA",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-206",
+    "nis": "11756",
+    "nisn": "11756",
+    "name": "PRIMAY ROTANIA",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-207",
+    "nis": "11757",
+    "nisn": "11757",
+    "name": "RANIAH AZMI HIDAYATI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-208",
+    "nis": "11689",
+    "nisn": "11689",
+    "name": "REFILIETA GHINA PRAMESWARI",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-209",
+    "nis": "11727",
+    "nisn": "11727",
+    "name": "SHAFIRA PRAMITA RAMADINA",
+    "gender": "P",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-210",
+    "nis": "11797",
+    "nisn": "11797",
+    "name": "WAHYU AHMAD INDRA CAHYO",
+    "gender": "L",
+    "className": "XII-10",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-211",
+    "nis": "11841",
+    "nisn": "11841",
+    "name": "AKIFA NAJWA AZ ZAHRA",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-212",
+    "nis": "11947",
+    "nisn": "11947",
+    "name": "ALFIRA ARYA CINDY",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-213",
+    "nis": "11844",
+    "nisn": "11844",
+    "name": "ANDIKA RAMA ARIYANTO",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-214",
+    "nis": "11916",
+    "nisn": "11916",
+    "name": "ANITA DWI LESTARI",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-215",
+    "nis": "11845",
+    "nisn": "11845",
+    "name": "AUREL TABRIZHA JASMINE",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-216",
+    "nis": "11949",
+    "nisn": "11949",
+    "name": "AYU PUTRITAMA",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-217",
+    "nis": "11951",
+    "nisn": "11951",
+    "name": "CELINA KIRANA PRAMESTI",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-218",
+    "nis": "11849",
+    "nisn": "11849",
+    "name": "CHARISSA EKA CANDRANINGTYAS",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-219",
+    "nis": "11990",
+    "nisn": "11990",
+    "name": "CHELSEA BRILLIANT ARIDENNIA",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-220",
+    "nis": "11880",
+    "nisn": "11880",
+    "name": "DIMAS RAFI PRATAMA",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-221",
+    "nis": "11881",
+    "nisn": "11881",
+    "name": "DIYANA SYAHIRA ARIFANTY",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-222",
+    "nis": "11924",
+    "nisn": "11924",
+    "name": "DWI CANDRA KURNIAWAN",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-223",
+    "nis": "11994",
+    "nisn": "11994",
+    "name": "FARICHAH HANUM",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-224",
+    "nis": "11855",
+    "nisn": "11855",
+    "name": "GADIS KARTIKA SARI",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-225",
+    "nis": "11856",
+    "nisn": "11856",
+    "name": "GITA NIRMALA ZABRINA",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-226",
+    "nis": "11995",
+    "nisn": "11995",
+    "name": "INTAN KAYLA SHAFA ANNISA",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-227",
+    "nis": "11957",
+    "nisn": "11957",
+    "name": "JOVITA ENESIA SABILILLAH",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-228",
+    "nis": "11885",
+    "nisn": "11885",
+    "name": "KARINA VITANTRI JULIA",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-229",
+    "nis": "11996",
+    "nisn": "11996",
+    "name": "KAYLLA SUFFIYAH",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-230",
+    "nis": "11887",
+    "nisn": "11887",
+    "name": "KHANZAIERA JULYA EKA PUTRI",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-231",
+    "nis": "12000",
+    "nisn": "12000",
+    "name": "LENY FITRIYANTI JATMIKO",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-232",
+    "nis": "11930",
+    "nisn": "11930",
+    "name": "MADINATI NOR WAHONO",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-233",
+    "nis": "11931",
+    "nisn": "11931",
+    "name": "MOH. ADIT FARHANSYAH",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-234",
+    "nis": "11964",
+    "nisn": "11964",
+    "name": "MOH. FAHRIL DWI YANSYAH",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-235",
+    "nis": "11827",
+    "nisn": "11827",
+    "name": "MUH. ABI EKA MAULANA",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-236",
+    "nis": "11863",
+    "nisn": "11863",
+    "name": "MUHAMMAD MAHARDIKA IRSYADUL' AIFAT",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-237",
+    "nis": "11967",
+    "nisn": "11967",
+    "name": "MUHAMMAD REYHAN ARGIANSYAH",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-238",
+    "nis": "11935",
+    "nisn": "11935",
+    "name": "MUHAMMAD RIZKY AINUR RAHMAN",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-239",
+    "nis": "11971",
+    "nisn": "11971",
+    "name": "NIKMATUL HIKMAH",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-240",
+    "nis": "11899",
+    "nisn": "11899",
+    "name": "OTNIEL KEVIN ERLANGGA",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-241",
+    "nis": "11833",
+    "nisn": "11833",
+    "name": "SINTA CLAUDIA SALSABILLA",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-242",
+    "nis": "11872",
+    "nisn": "11872",
+    "name": "TIA FATHAN HANIDAH",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-243",
+    "nis": "11980",
+    "nisn": "11980",
+    "name": "VIANDA REIHAN FERYANTO",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-244",
+    "nis": "11906",
+    "nisn": "11906",
+    "name": "WAHYU DIAN ADI PRASETYO",
+    "gender": "L",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-245",
+    "nis": "11836",
+    "nisn": "11836",
+    "name": "YOLANDA RAMADHANTI",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-246",
+    "nis": "11908",
+    "nisn": "11908",
+    "name": "ZAHRA TALITA DZAKIRA",
+    "gender": "P",
+    "className": "XII-11",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-247",
+    "nis": "11987",
+    "nisn": "11987",
+    "name": "ALIF FATUR ROHMAN",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-248",
+    "nis": "12019",
+    "nisn": "12019",
+    "name": "ALOYSIA ASIFARINDA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-249",
+    "nis": "12020",
+    "nisn": "12020",
+    "name": "AMELIA DWI RAHMADANI",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-250",
+    "nis": "11660",
+    "nisn": "11660",
+    "name": "ANDRE FERDIANSYAH",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-251",
+    "nis": "12056",
+    "nisn": "12056",
+    "name": "ANGELINA NISRINA MAGHFIRAH",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-252",
+    "nis": "11768",
+    "nisn": "11768",
+    "name": "ARINDY WASHILA NUR AWILLAH",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-253",
+    "nis": "11664",
+    "nisn": "11664",
+    "name": "ARJUNA BINTANG PUTRA PAMUNGKAS",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-254",
+    "nis": "12024",
+    "nisn": "12024",
+    "name": "ASTRI NURIYA ANDINI",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-255",
+    "nis": "11810",
+    "nisn": "11810",
+    "name": "AYU SEPTIANA RAMADHANI",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-256",
+    "nis": "12060",
+    "nisn": "12060",
+    "name": "CHIKA AURA SABRINA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-257",
+    "nis": "12028",
+    "nisn": "12028",
+    "name": "DAHRUL ALFIN ZANUAR",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-258",
+    "nis": "12029",
+    "nisn": "12029",
+    "name": "DAVINA BUNGA PRINCESSA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-259",
+    "nis": "12033",
+    "nisn": "12033",
+    "name": "DITA MADYA APRILIA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-260",
+    "nis": "12034",
+    "nisn": "12034",
+    "name": "FAIZAH AULIA HANIF",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-261",
+    "nis": "11711",
+    "nisn": "11711",
+    "name": "JELITA INDAH KIRANA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-262",
+    "nis": "12072",
+    "nisn": "12072",
+    "name": "LAURA FITRIA RAMADHANI",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-263",
+    "nis": "12037",
+    "nisn": "12037",
+    "name": "LIKAYLA LUTFIA RAHMANIA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-264",
+    "nis": "12001",
+    "nisn": "12001",
+    "name": "M. FATKHUL ASYROFI RAMADHAN",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-265",
+    "nis": "12073",
+    "nisn": "12073",
+    "name": "MOCH. RYAMIZARD NOVINDHA VAN RENO",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-266",
+    "nis": "12005",
+    "nisn": "12005",
+    "name": "MOH. PRASETYO HADI SANTOSO",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-267",
+    "nis": "12006",
+    "nisn": "12006",
+    "name": "MUHAMMAD HAFIZ OCTAFIANSYAH",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-268",
+    "nis": "12041",
+    "nisn": "12041",
+    "name": "MUHAMMAD ILHAM",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-269",
+    "nis": "11679",
+    "nisn": "11679",
+    "name": "MUHAMMAD RISDIAN WICAKSONO",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-270",
+    "nis": "12043",
+    "nisn": "12043",
+    "name": "NAFIIS AGIEL MAHARDHIKA",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-271",
+    "nis": "11681",
+    "nisn": "11681",
+    "name": "NAILA PUTRI RAHMADHANI SAMUDRA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-272",
+    "nis": "12007",
+    "nisn": "12007",
+    "name": "NAYLA RIZKIA ZAHWA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-273",
+    "nis": "12078",
+    "nisn": "12078",
+    "name": "NIKEISHA AQLA BRILLIANT",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-274",
+    "nis": "12048",
+    "nisn": "12048",
+    "name": "RADINA MECCA PUTRI",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-275",
+    "nis": "11687",
+    "nisn": "11687",
+    "name": "RAHEL AYU UMU FAUZIAH",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-276",
+    "nis": "11688",
+    "nisn": "11688",
+    "name": "RAUDYATUZ ZAHRA MAULANI",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-277",
+    "nis": "12011",
+    "nisn": "12011",
+    "name": "REVINA IMELDA PUTRI",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-278",
+    "nis": "11869",
+    "nisn": "11869",
+    "name": "SASYA IZZATI NARARYA WAHYUDI",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-279",
+    "nis": "12084",
+    "nisn": "12084",
+    "name": "VANESYA TRIO RAMADHANI",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-280",
+    "nis": "12016",
+    "nisn": "12016",
+    "name": "VIKA DWI ARNETA",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-281",
+    "nis": "12085",
+    "nisn": "12085",
+    "name": "VITO DWI SONIA PUTRA",
+    "gender": "L",
+    "className": "XII-12",
+    "parentPhone": ""
+  },
+  {
+    "id": "std-282",
+    "nis": "11693",
+    "nisn": "11693",
+    "name": "ZAHROTUL AUFA SA'DIYYAH",
+    "gender": "P",
+    "className": "XII-12",
+    "parentPhone": ""
+  }
+]
