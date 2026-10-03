@@ -21,6 +21,34 @@
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Html5Qrcode Scanner Styling */
+#qr-reader {
+  width: 100% !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+#qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0.75rem !important;
+}
+
+#qr-reader__scan_region {
+  border-radius: 0.75rem !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+#qr-reader__dashboard {
+  padding: 0 !important;
+}
+
+#qr-reader img[alt="Info icon"] {
+  display: none !important;
+}
+
 /* Standalone Print CSS for Clean A4 Printing */
 @media print {
   @page {
