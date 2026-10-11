@@ -15,7 +15,7 @@ export const ACTIVITY_OPTIONS: ActivityType[] = [
   'Khotmil Qur’an',
 ];
 
-export type AttendanceStatus = 'Hadir' | 'Sakit' | 'Izin' | 'Alpa' | 'Terlambat';
+export type AttendanceStatus = 'Hadir' | 'Berhalangan' | 'Sakit' | 'Izin' | 'Alpa' | 'Terlambat';
 
 export type DisciplineCategory = 'Ringan' | 'Sedang' | 'Berat';
 
@@ -43,8 +43,38 @@ export interface AttendanceRecord {
   notes?: string;
   method: 'QR_SCAN' | 'MANUAL';
   teacher: string;
+  deviceStation?: string; // e.g. 'Pos 1'
+  operatorName?: string; // e.g. 'Petugas ROHIS - Ahmad'
   syncedToSpreadsheet?: boolean;
 }
+
+export type UserRole = 'guru' | 'rohis';
+
+export interface RohisStation {
+  id: number;
+  name: string;
+  defaultLocation: string;
+}
+
+export interface RohisSession {
+  stationId: number;
+  stationName: string;
+  officerName: string;
+  activity: ActivityType;
+  startedAt: string;
+}
+
+export const MASTER_APP_PASSWORD = '101073';
+
+export const ROHIS_DEFAULT_STATIONS: RohisStation[] = [
+  { id: 1, name: 'Pos 1', defaultLocation: 'Masjid Al Hikmah SMAN 1 Krembung' },
+  { id: 2, name: 'Pos 2', defaultLocation: 'Masjid Al Hikmah SMAN 1 Krembung' },
+  { id: 3, name: 'Pos 3', defaultLocation: 'Masjid Al Hikmah SMAN 1 Krembung' },
+  { id: 4, name: 'Pos 4', defaultLocation: 'Masjid Al Hikmah SMAN 1 Krembung' },
+  { id: 5, name: 'Pos 5', defaultLocation: 'Masjid Al Hikmah SMAN 1 Krembung' },
+  { id: 6, name: 'Pos 6', defaultLocation: 'Masjid Al Hikmah SMAN 1 Krembung' },
+  { id: 7, name: 'Pos 7', defaultLocation: 'Masjid Al Hikmah SMAN 1 Krembung' },
+];
 
 export interface DisciplineRecord {
   id: string;

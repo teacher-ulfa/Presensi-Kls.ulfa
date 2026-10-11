@@ -9,7 +9,10 @@ import {
   AttendanceRecord, 
   DisciplineRecord, 
   SpreadsheetConfig, 
-  ActivityType 
+  ActivityType,
+  UserRole,
+  RohisSession,
+  MASTER_APP_PASSWORD 
 } from './types';
 import { storageService } from './services/storageService';
 import { spreadsheetService, SyncResult } from './services/spreadsheetService';
@@ -26,7 +29,13 @@ import { CetakKartuQR } from './components/CetakKartuQR';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => storageService.isLoggedIn());
-  const [activeTab, setActiveTab] = useState<ActiveTab>('beranda');
+  const [userRole, setUserRole] = useState<UserRole>(() => storageService.getUserRole());
+  const [rohisSession, setRohisSession] = useState<RohisSession | null>(() => storageService.getRohisSession());
+  
+  // If in ROHIS mode, lock activeTab to 'scan-qr'
+  const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
+    return storageService.getUserRole() === 'rohis' ? 'scan-qr' : 'beranda';
+  });
   
   // State for students, attendance, discipline, and spreadsheet config
   const [students, setStudents] = useState<Student[]>(() => storageService.getStudents());
@@ -62,38 +71,153 @@ export default function App() {
     storageService.saveSpreadsheetConfig(spreadsheetConfig);
   }, [spreadsheetConfig]);
 
+  // Real-time Cross-Window / Multi-Device Synchronization (BroadcastChannel)
+  useEffect(() => {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel('siap_pai_live_sync');
+      
+      channel.onmessage = (event) => {
+        if (event.data?.type === 'SYNC_ATTENDANCE' && Array.isArray(event.data.records)) {
+          setAttendance((prev) => {
+            const existingIds = new Set(prev.map(r => r.id));
+            const newOnes = event.data.records.filter((r: AttendanceRecord) => !existingIds.has(r.id));
+            return newOnes.length > 0 ? [...newOnes, ...prev] : prev;
+          });
+        }
+      };
+
+      return () => {
+        channel.close();
+      };
+    }
+  }, []);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage(null);
-    }, 4000);
+    }, 4500);
+  };
+
+  // Broadcast new attendance record to other open tabs/windows
+  const broadcastNewAttendance = (records: AttendanceRecord[]) => {
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        const channel = new BroadcastChannel('siap_pai_live_sync');
+        channel.postMessage({ type: 'SYNC_ATTENDANCE', records });
+        channel.close();
+      } catch (err) {
+        console.warn('Broadcast sync error:', err);
+      }
+    }
   };
 
   // Login handler
-  const handleLogin = () => {
+  const handleLogin = (role: UserRole = 'guru', session?: RohisSession) => {
     setIsLoggedIn(true);
     storageService.setLoggedIn(true);
-    setActiveTab('beranda');
+    setUserRole(role);
+    storageService.setUserRole(role);
+
+    if (role === 'rohis' && session) {
+      setRohisSession(session);
+      storageService.setRohisSession(session);
+      setPresetActivity(session.activity);
+      setActiveTab('scan-qr');
+      showToast(`Mode Petugas Scan ROHIS Aktif: ${session.stationName} (${session.officerName})`);
+    } else {
+      setRohisSession(null);
+      storageService.setRohisSession(null);
+      setActiveTab('beranda');
+      showToast('Masuk sebagai Guru Pengampu (Ulfatul Husna, S.Ag.,M.Pd.) - Akses Penuh.');
+    }
   };
 
-  // Shortcut login to scan QR directly
-  const handleQuickScanFromCover = (activity: ActivityType) => {
+  // Shortcut login to scan QR directly from cover
+  const handleQuickScanFromCover = (activity: ActivityType, session?: RohisSession) => {
     setIsLoggedIn(true);
     storageService.setLoggedIn(true);
+    if (session) {
+      setUserRole('rohis');
+      storageService.setUserRole('rohis');
+      setRohisSession(session);
+      storageService.setRohisSession(session);
+    } else {
+      setUserRole('guru');
+      storageService.setUserRole('guru');
+    }
     setPresetActivity(activity);
     setActiveTab('scan-qr');
+  };
+
+  // Switch to Guru mode (requires password 101073)
+  const handleSwitchToGuru = (password: string): boolean => {
+    if (storageService.verifyPassword(password)) {
+      setUserRole('guru');
+      storageService.setUserRole('guru');
+      showToast('Berhasil beralih ke Akun Guru Pengampu (Akses Penuh Seluruh Menu).');
+      return true;
+    }
+    return false;
+  };
+
+  // Switch to ROHIS mode
+  const handleSwitchToRohis = () => {
+    setUserRole('rohis');
+    storageService.setUserRole('rohis');
+    if (!rohisSession) {
+      const defaultSession: RohisSession = {
+        stationId: 1,
+        stationName: 'Pos 1',
+        officerName: 'Tim Murid ROHIS',
+        activity: presetActivity,
+        startedAt: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      };
+      setRohisSession(defaultSession);
+      storageService.setRohisSession(defaultSession);
+    }
+    setActiveTab('scan-qr');
+    showToast('Beralih ke Mode Petugas Scan ROHIS (6-7 Perangkat). Terkunci di Menu Scan QR.');
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     storageService.setLoggedIn(false);
+    setUserRole('guru');
+    storageService.setUserRole('guru');
+    setRohisSession(null);
+    storageService.setRohisSession(null);
+  };
+
+  // Multi-device Attendance Merger (from 6-7 devices)
+  const handleBatchMergeAttendance = (records: AttendanceRecord[]) => {
+    const result = storageService.mergeAttendanceRecords(records, attendance);
+    setAttendance(result.merged);
+    broadcastNewAttendance(records);
+    showToast(`Berhasil menggabungkan ${result.addedCount} presensi baru (${result.duplicateCount} duplikasi diabaikan).`);
+
+    if (spreadsheetConfig.autoSync) {
+      triggerSpreadsheetSync(result.merged, []);
+    }
+    return result;
   };
 
   // Add single attendance record (e.g. from QR scan)
   const handleAddAttendance = (record: AttendanceRecord) => {
     setAttendance((prev) => [record, ...prev]);
+    broadcastNewAttendance([record]);
 
     // If auto-sync to spreadsheet is enabled
+    if (spreadsheetConfig.autoSync) {
+      triggerSpreadsheetSync([record], []);
+    }
+  };
+
+  // Update single attendance record (e.g. toggle status Hadir <-> Berhalangan Haid)
+  const handleUpdateAttendance = (record: AttendanceRecord) => {
+    setAttendance((prev) => prev.map((a) => (a.id === record.id ? record : a)));
+    broadcastNewAttendance([record]);
+
     if (spreadsheetConfig.autoSync) {
       triggerSpreadsheetSync([record], []);
     }
@@ -102,6 +226,7 @@ export default function App() {
   // Batch save attendance (from manual input)
   const handleBatchSaveAttendance = (records: AttendanceRecord[]) => {
     setAttendance((prev) => [...records, ...prev]);
+    broadcastNewAttendance(records);
 
     if (spreadsheetConfig.autoSync) {
       triggerSpreadsheetSync(records, []);
@@ -155,7 +280,7 @@ export default function App() {
 
   const handleUpdateStudent = (student: Student) => {
     setStudents((prev) => prev.map((s) => (s.id === student.id ? student : s)));
-    showToast(`Data siswa ${student.name} berhasil diperbarui.`);
+    showToast(`Data siswa ${student.name} diperbarui.`);
   };
 
   const handleDeleteStudent = (id: string) => {
@@ -203,6 +328,15 @@ export default function App() {
     );
   }
 
+  // Safe tab change: if in ROHIS mode, murid ROHIS is restricted to 'scan-qr' only
+  const handleSafeTabChange = (newTab: ActiveTab) => {
+    if (userRole === 'rohis') {
+      setActiveTab('scan-qr');
+    } else {
+      setActiveTab(newTab);
+    }
+  };
+
   // Logged-in application layout
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between selection:bg-emerald-600 selection:text-white">
@@ -210,10 +344,14 @@ export default function App() {
         {/* Top Bar Navigation */}
         <HeaderNav
           activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          setActiveTab={handleSafeTabChange}
           onLogout={handleLogout}
           onSyncSpreadsheet={() => triggerSpreadsheetSync()}
           isSyncing={isSyncing}
+          userRole={userRole}
+          rohisSession={rohisSession}
+          onSwitchToGuru={handleSwitchToGuru}
+          onSwitchToRohis={handleSwitchToRohis}
         />
 
         {/* Global Toast Notification */}
@@ -231,7 +369,23 @@ export default function App() {
 
         {/* Main Content Area */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-          {activeTab === 'beranda' && (
+          {/* In ROHIS mode, ONLY scan-qr is shown */}
+          {(userRole === 'rohis' || activeTab === 'scan-qr') && (
+            <ScanQR
+              initialActivity={presetActivity}
+              students={students}
+              onAddAttendance={handleAddAttendance}
+              onUpdateAttendance={handleUpdateAttendance}
+              recentAttendance={attendance}
+              onSyncSpreadsheet={() => triggerSpreadsheetSync()}
+              isSyncing={isSyncing}
+              userRole={userRole}
+              rohisSession={rohisSession}
+              onBatchMergeAttendance={handleBatchMergeAttendance}
+            />
+          )}
+
+          {userRole === 'guru' && activeTab === 'beranda' && (
             <Beranda
               onNavigate={setActiveTab}
               onQuickScanActivity={(act) => {
@@ -250,18 +404,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'scan-qr' && (
-            <ScanQR
-              initialActivity={presetActivity}
-              students={students}
-              onAddAttendance={handleAddAttendance}
-              recentAttendance={attendance}
-              onSyncSpreadsheet={() => triggerSpreadsheetSync()}
-              isSyncing={isSyncing}
-            />
-          )}
-
-          {activeTab === 'presensi-manual' && (
+          {userRole === 'guru' && activeTab === 'presensi-manual' && (
             <PresensiManual
               students={students}
               onBatchSaveAttendance={handleBatchSaveAttendance}
@@ -270,7 +413,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'data-murid' && (
+          {userRole === 'guru' && activeTab === 'data-murid' && (
             <DataMurid
               students={students}
               onAddStudent={handleAddStudent}
@@ -284,7 +427,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'catatan-kedisiplinan' && (
+          {userRole === 'guru' && activeTab === 'catatan-kedisiplinan' && (
             <CatatanKedisiplinan
               disciplineRecords={discipline}
               students={students}
@@ -297,21 +440,22 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'rekap-presensi' && (
+          {userRole === 'guru' && activeTab === 'rekap-presensi' && (
             <RekapPresensi
               attendanceRecords={attendance}
               students={students}
+              onBatchMergeAttendance={handleBatchMergeAttendance}
             />
           )}
 
-          {activeTab === 'cetak-qr' && (
+          {userRole === 'guru' && activeTab === 'cetak-qr' && (
             <CetakKartuQR
               students={students}
               initialClass={selectedClassForPrint}
             />
           )}
 
-          {activeTab === 'spreadsheet' && (
+          {userRole === 'guru' && activeTab === 'spreadsheet' && (
             <SpreadsheetHub
               config={spreadsheetConfig}
               onUpdateConfig={(cfg) => {

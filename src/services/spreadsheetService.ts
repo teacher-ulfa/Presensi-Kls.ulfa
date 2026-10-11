@@ -88,6 +88,8 @@ export const spreadsheetService = {
       'Waktu (WIB)',
       'Status Kehadiran',
       'Metode Presensi',
+      'Pos / Perangkat Scan',
+      'Petugas ROHIS / Operator',
       'Catatan / Materi',
       'Guru Pengampu'
     ];
@@ -102,6 +104,8 @@ export const spreadsheetService = {
       `"${r.time}"`,
       `"${r.status}"`,
       `"${r.method === 'QR_SCAN' ? 'Scan QR Code' : 'Manual'}"`,
+      `"${(r.deviceStation || 'Perangkat Utama').replace(/"/g, '""')}"`,
+      `"${(r.operatorName || 'Guru Pengampu').replace(/"/g, '""')}"`,
       `"${(r.notes || '-').replace(/"/g, '""')}"`,
       `"${r.teacher}"`
     ]);
@@ -181,9 +185,10 @@ function doPost(e) {
       sheetPresensi = ss.insertSheet("Data_Presensi_PAI");
       sheetPresensi.appendRow([
         "Timestamp Sync", "ID Presensi", "NISN", "Nama Siswa", 
-        "Kelas", "Kegiatan", "Tanggal", "Waktu", "Status", "Metode", "Keterangan", "Guru"
+        "Kelas", "Kegiatan", "Tanggal", "Waktu", "Status", "Metode", 
+        "Pos Perangkat", "Petugas ROHIS", "Keterangan", "Guru"
       ]);
-      sheetPresensi.getRange(1, 1, 1, 12).setBackground("#047857").setFontColor("#FFFFFF").setFontWeight("bold");
+      sheetPresensi.getRange(1, 1, 1, 14).setBackground("#047857").setFontColor("#FFFFFF").setFontWeight("bold");
     }
 
     // Append baris presensi baru
@@ -193,7 +198,8 @@ function doPost(e) {
         sheetPresensi.appendRow([
           new Date(), a.id, a.studentNisn, a.studentName,
           a.className, a.activity, a.date, a.time, a.status,
-          a.method, a.notes || "-", a.teacher
+          a.method, a.deviceStation || "Pos Utama", a.operatorName || "Petugas ROHIS/Guru",
+          a.notes || "-", a.teacher
         ]);
       }
     }

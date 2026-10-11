@@ -120,9 +120,9 @@ export const Beranda: React.FC<BerandaProps> = ({
     {
       id: 'scan-qr' as ActiveTab,
       title: 'Scan QR.Code Presensi',
-      badge: 'Cepat & Akurat',
-      badgeColor: 'bg-slate-100 text-slate-700',
-      desc: 'Presensi otomatis realtime via kamera atau scanner digital. Dilengkapi filter kelas dan 6 jenis kegiatan ibadah & pembelajaran.',
+      badge: 'Cepat & Akurat · Mode Siswi Haid',
+      badgeColor: 'bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold',
+      desc: 'Presensi otomatis realtime via kamera atau scanner digital. Dilengkapi filter rombel, 6 jenis kegiatan ibadah, serta Mode Khusus Presensi Siswi Berhalangan (Haid) dengan kartu QR yang sudah dicetak.',
       icon: <QrCode className="w-6 h-6 text-emerald-600" />,
       actionText: 'Buka Scanner QR',
       quickList: ['Pembelajaran', 'Sholat Dhuha', 'Dzuhur', 'Ashar', 'Istighotsah', 'Khotmil Qur’an']
@@ -130,9 +130,9 @@ export const Beranda: React.FC<BerandaProps> = ({
     {
       id: 'presensi-manual' as ActiveTab,
       title: 'Input Presensi Manual',
-      badge: 'Filter per Kelas',
+      badge: 'Filter per Kelas · Uzur Syar\'i',
       badgeColor: 'bg-slate-100 text-slate-700',
-      desc: 'Pencatatan presensi terstruktur per rombongan belajar (X-1 s/d X-4 & XII-9 s/d XII-12) dengan opsi Hadir, Sakit, Izin, Alpa, Terlambat, dan tombol Semua Hadir.',
+      desc: 'Pencatatan presensi terstruktur per rombongan belajar (X-1 s/d X-4 & XII-9 s/d XII-12) dengan opsi Hadir, Berhalangan (Haid), Sakit, Izin, Alpa, Terlambat, dan tombol Semua Hadir.',
       icon: <ClipboardCheck className="w-6 h-6 text-teal-600" />,
       actionText: 'Input Presensi Kelas',
     },

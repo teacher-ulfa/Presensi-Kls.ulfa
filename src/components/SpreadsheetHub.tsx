@@ -223,9 +223,11 @@ export const SpreadsheetHub: React.FC<SpreadsheetHubProps> = ({
                     <td className="py-2 px-3 border-r border-slate-200">{row.activity}</td>
                     <td className="py-2 px-3 border-r border-slate-200">
                       <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                        row.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                        row.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800' :
+                        row.status === 'Berhalangan' ? 'bg-pink-100 text-pink-800 border border-pink-300' :
+                        'bg-amber-100 text-amber-800'
                       }`}>
-                        {row.status}
+                        {row.status === 'Berhalangan' ? 'Berhalangan (Haid)' : row.status}
                       </span>
                     </td>
                     <td className="py-2 px-3 border-r border-slate-200 text-[10px] text-slate-500">{row.method}</td>

@@ -55,14 +55,20 @@ export const PresensiManual: React.FC<PresensiManualProps> = ({
   };
 
   const setStudentStatus = (studentId: string, status: AttendanceStatus) => {
-    setAttendanceState((prev) => ({
-      ...prev,
-      [studentId]: {
-        ...prev[studentId],
-        status,
-        note: prev[studentId]?.note || '',
-      },
-    }));
+    setAttendanceState((prev) => {
+      const existingNote = prev[studentId]?.note || '';
+      const autoNote = (status === 'Berhalangan' && !existingNote)
+        ? 'Berhalangan sholat (Haid)'
+        : existingNote;
+      return {
+        ...prev,
+        [studentId]: {
+          ...prev[studentId],
+          status,
+          note: autoNote,
+        },
+      };
+    });
   };
 
   const setStudentNote = (studentId: string, note: string) => {
@@ -142,7 +148,7 @@ export const PresensiManual: React.FC<PresensiManualProps> = ({
               <span>Input Presensi Manual PAI &amp; Budi Pekerti</span>
             </h1>
             <p className="text-xs text-slate-500 mt-1">
-              Catat kehadiran per rombongan belajar dengan opsi status Hadir, Sakit, Izin, Alpa, Terlambat
+              Catat kehadiran per rombongan belajar dengan opsi status Hadir, Berhalangan (Haid), Sakit, Izin, Alpa, Terlambat
             </p>
           </div>
 
@@ -239,9 +245,10 @@ export const PresensiManual: React.FC<PresensiManualProps> = ({
 
         {/* Live Attendance Stats Counter */}
         <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-3">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <span>Total Siswa: <strong className="font-mono text-slate-900">{classStudents.length}</strong></span>
             <span className="text-emerald-700 font-medium">Hadir: <strong className="font-mono">{countStatus('Hadir')}</strong></span>
+            <span className="text-pink-700 font-medium">Berhalangan (Haid): <strong className="font-mono">{countStatus('Berhalangan')}</strong></span>
             <span className="text-blue-700 font-medium">Sakit: <strong className="font-mono">{countStatus('Sakit')}</strong></span>
             <span className="text-amber-700 font-medium">Izin: <strong className="font-mono">{countStatus('Izin')}</strong></span>
             <span className="text-rose-700 font-medium">Alpa: <strong className="font-mono">{countStatus('Alpa')}</strong></span>
@@ -323,25 +330,29 @@ export const PresensiManual: React.FC<PresensiManualProps> = ({
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1">
-                          {(['Hadir', 'Sakit', 'Izin', 'Alpa', 'Terlambat'] as AttendanceStatus[]).map((st) => {
+                          {(['Hadir', 'Berhalangan', 'Sakit', 'Izin', 'Alpa', 'Terlambat'] as AttendanceStatus[]).map((st) => {
                             const isSelected = currentStatus === st;
                             let activeClass = 'bg-emerald-700 text-white font-bold';
+                            if (st === 'Berhalangan') activeClass = 'bg-pink-600 text-white font-bold shadow-xs';
                             if (st === 'Sakit') activeClass = 'bg-blue-700 text-white font-bold';
                             if (st === 'Izin') activeClass = 'bg-amber-600 text-white font-bold';
                             if (st === 'Alpa') activeClass = 'bg-rose-700 text-white font-bold';
                             if (st === 'Terlambat') activeClass = 'bg-purple-700 text-white font-bold';
 
-                            const label = st === 'Hadir' ? 'H' : st === 'Sakit' ? 'S' : st === 'Izin' ? 'I' : st === 'Alpa' ? 'A' : 'T';
+                            const label = st === 'Hadir' ? 'H' : st === 'Berhalangan' ? 'B' : st === 'Sakit' ? 'S' : st === 'Izin' ? 'I' : st === 'Alpa' ? 'A' : 'T';
+                            const title = st === 'Berhalangan' ? 'Berhalangan (Haid / Uzur Syar\'i)' : st;
 
                             return (
                               <button
                                 key={st}
                                 type="button"
                                 onClick={() => setStudentStatus(student.id, st)}
-                                title={st}
+                                title={title}
                                 className={`w-8 h-8 rounded text-xs font-semibold transition cursor-pointer flex items-center justify-center ${
                                   isSelected 
                                     ? activeClass 
+                                    : st === 'Berhalangan' && student.gender === 'P'
+                                    ? 'bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200'
                                     : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                                 }`}
                               >

@@ -3,7 +3,10 @@ import {
   AttendanceRecord, 
   DisciplineRecord, 
   SpreadsheetConfig, 
-  TeacherUser 
+  TeacherUser,
+  UserRole,
+  RohisSession,
+  MASTER_APP_PASSWORD 
 } from '../types';
 import { 
   INITIAL_STUDENTS, 
@@ -20,9 +23,75 @@ const KEYS = {
   SPREADSHEET: 'siap_pai_spreadsheet_v3',
   TEACHER: 'siap_pai_teacher_v3',
   AUTH: 'siap_pai_auth_session_v3',
+  USER_ROLE: 'siap_pai_user_role_v3',
+  ROHIS_SESSION: 'siap_pai_rohis_session_v3',
 };
 
 export const storageService = {
+  // Password Verification (101073 is the official system password)
+  verifyPassword: (input: string): boolean => {
+    const clean = input.trim();
+    return clean === MASTER_APP_PASSWORD || clean === '197410101998022001';
+  },
+
+  // Role Management
+  getUserRole: (): UserRole => {
+    const role = localStorage.getItem(KEYS.USER_ROLE);
+    return role === 'rohis' ? 'rohis' : 'guru';
+  },
+  setUserRole: (role: UserRole): void => {
+    localStorage.setItem(KEYS.USER_ROLE, role);
+  },
+
+  // Rohis Session (Station, Officer, Activity)
+  getRohisSession: (): RohisSession | null => {
+    try {
+      const data = localStorage.getItem(KEYS.ROHIS_SESSION);
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  },
+  setRohisSession: (session: RohisSession | null): void => {
+    if (session) {
+      localStorage.setItem(KEYS.ROHIS_SESSION, JSON.stringify(session));
+    } else {
+      localStorage.removeItem(KEYS.ROHIS_SESSION);
+    }
+  },
+
+  // Multi-device attendance merging (with smart deduplication)
+  mergeAttendanceRecords: (
+    incoming: AttendanceRecord[],
+    existing: AttendanceRecord[]
+  ): { merged: AttendanceRecord[]; addedCount: number; duplicateCount: number } => {
+    // Unique key: studentId or studentNisn + date + activity
+    const existingKeys = new Set(
+      existing.map((r) => `${r.studentNisn || r.studentId}_${r.date}_${r.activity}`)
+    );
+
+    const newRecordsToAdd: AttendanceRecord[] = [];
+    let duplicateCount = 0;
+
+    for (const rec of incoming) {
+      const key = `${rec.studentNisn || rec.studentId}_${rec.date}_${rec.activity}`;
+      if (!existingKeys.has(key)) {
+        existingKeys.add(key);
+        newRecordsToAdd.push(rec);
+      } else {
+        duplicateCount++;
+      }
+    }
+
+    const merged = [...newRecordsToAdd, ...existing];
+    storageService.saveAttendance(merged);
+
+    return {
+      merged,
+      addedCount: newRecordsToAdd.length,
+      duplicateCount,
+    };
+  },
   // Students
   getStudents: (): Student[] => {
     try {

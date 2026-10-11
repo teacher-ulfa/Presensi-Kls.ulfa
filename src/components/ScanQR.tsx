@@ -21,14 +21,25 @@ import {
   ZapOff,
   Maximize2,
   Check,
-  UserCheck
+  UserCheck,
+  Smartphone,
+  Share2,
+  Download,
+  Copy,
+  Layers,
+  FileText,
+  Heart
 } from 'lucide-react';
 import { 
   ActivityType, 
   ACTIVITY_OPTIONS, 
   SCHOOL_CLASSES, 
   Student, 
-  AttendanceRecord 
+  AttendanceRecord,
+  AttendanceStatus,
+  UserRole,
+  RohisSession,
+  ROHIS_DEFAULT_STATIONS
 } from '../types';
 import { soundService } from '../services/soundService';
 
@@ -36,9 +47,13 @@ interface ScanQRProps {
   initialActivity?: ActivityType;
   students: Student[];
   onAddAttendance: (record: AttendanceRecord) => void;
+  onUpdateAttendance?: (record: AttendanceRecord) => void;
   recentAttendance: AttendanceRecord[];
   onSyncSpreadsheet: () => void;
   isSyncing: boolean;
+  userRole?: UserRole;
+  rohisSession?: RohisSession | null;
+  onBatchMergeAttendance?: (records: AttendanceRecord[]) => { addedCount: number; duplicateCount: number };
 }
 
 interface IdentifiedCamera {
@@ -51,16 +66,34 @@ export const ScanQR: React.FC<ScanQRProps> = ({
   initialActivity = 'Pembelajaran',
   students,
   onAddAttendance,
+  onUpdateAttendance,
   recentAttendance,
   onSyncSpreadsheet,
   isSyncing,
+  userRole = 'guru',
+  rohisSession = null,
+  onBatchMergeAttendance,
 }) => {
-  const [selectedActivity, setSelectedActivity] = useState<ActivityType>(initialActivity);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityType>(
+    rohisSession ? rohisSession.activity : initialActivity
+  );
   const [selectedClass, setSelectedClass] = useState<string>('Semua Kelas');
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isStartingCamera, setIsStartingCamera] = useState<boolean>(false);
   const [cameraError, setCameraError] = useState<string>('');
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+
+  // Mode Presensi: 'HADIR' (normal sholat berjama'ah) vs 'BERHALANGAN_HAID' (khusus siswi uzur syar'i)
+  const [scanAttendanceMode, setScanAttendanceMode] = useState<'HADIR' | 'BERHALANGAN_HAID'>('HADIR');
+  const scanAttendanceModeRef = useRef<'HADIR' | 'BERHALANGAN_HAID'>('HADIR');
+  useEffect(() => {
+    scanAttendanceModeRef.current = scanAttendanceMode;
+  }, [scanAttendanceMode]);
+
+  // Modal Presensi Cepat Siswi Berhalangan (Tanpa Scan)
+  const [showHaidModal, setShowHaidModal] = useState<boolean>(false);
+  const [haidSearchQuery, setHaidSearchQuery] = useState<string>('');
+  const [haidFilterClass, setHaidFilterClass] = useState<string>('Semua Kelas');
   
   // Camera selection states
   const [availableCameras, setAvailableCameras] = useState<IdentifiedCamera[]>([]);
@@ -78,11 +111,20 @@ export const ScanQR: React.FC<ScanQRProps> = ({
   // Visual scan detection animation state
   const [scanPulse, setScanPulse] = useState<boolean>(false);
 
-  // Last scanned student feedback
+  // Multi-device Modals state
+  const [showExportModal, setShowExportModal] = useState<boolean>(false);
+  const [copiedExport, setCopiedExport] = useState<boolean>(false);
+  const [showMergeModal, setShowMergeModal] = useState<boolean>(false);
+  const [mergeJsonInput, setMergeJsonInput] = useState<string>('');
+  const [mergeResultMsg, setMergeResultMsg] = useState<{ text: string; success: boolean } | null>(null);
+
+  // Last scanned student feedback (includes status & recordId)
   const [lastScanned, setLastScanned] = useState<{
     student: Student;
     time: string;
     activity: ActivityType;
+    status: AttendanceStatus;
+    recordId?: string;
   } | null>(null);
 
   // Manual input / quick scan input
@@ -263,9 +305,106 @@ export const ScanQR: React.FC<ScanQRProps> = ({
     }
   }, [students, soundEnabled, selectedActivity, recentAttendance]);
 
-  const recordAttendanceForStudent = (student: Student) => {
+  const femaleStudentsList = students.filter((s) => {
+    if (s.gender !== 'P') return false;
+    const matchClass = haidFilterClass === 'Semua Kelas' || s.className === haidFilterClass;
+    const matchQuery = !haidSearchQuery.trim() ||
+      s.name.toLowerCase().includes(haidSearchQuery.toLowerCase()) ||
+      s.nisn.includes(haidSearchQuery) ||
+      s.className.toLowerCase().includes(haidSearchQuery.toLowerCase());
+    return matchClass && matchQuery;
+  });
+
+  const handleToggleStudentStatus = (student: Student, targetStatus: AttendanceStatus) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const existing = recentAttendance.find(
+      (a) => (a.studentId === student.id || a.studentNisn === student.nisn) && a.activity === selectedActivity && a.date === today
+    );
+
+    const stationLabel = userRole === 'rohis' && rohisSession ? rohisSession.stationName : 'Pos Guru Pengampu';
+    const officerLabel = userRole === 'rohis' && rohisSession ? rohisSession.officerName : 'Ibu Ulfatul Husna, S.Ag.,M.Pd.';
+    const nowTime = new Date().toLocaleTimeString('id-ID', { hour12: false });
+
+    if (existing) {
+      const updated: AttendanceRecord = {
+        ...existing,
+        status: targetStatus,
+        notes: targetStatus === 'Berhalangan' 
+          ? `Berhalangan sholat (Haid) via ${stationLabel} (${officerLabel})` 
+          : `Presensi Hadir via ${stationLabel} (${officerLabel})`,
+      };
+      if (onUpdateAttendance) {
+        onUpdateAttendance(updated);
+      } else {
+        onAddAttendance(updated);
+      }
+      setLastScanned({
+        student,
+        time: existing.time || nowTime,
+        activity: selectedActivity,
+        status: targetStatus,
+        recordId: existing.id,
+      });
+      setScanMessage({
+        text: targetStatus === 'Berhalangan' 
+          ? `🌸 Status ${student.name} diperbarui menjadi: Berhalangan (Haid).` 
+          : `✓ Status ${student.name} diperbarui menjadi: Hadir (Sholat).`,
+        type: 'success',
+      });
+      if (soundEnabled) soundService.playSuccessBeep();
+    } else {
+      const newRecord: AttendanceRecord = {
+        id: `att-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        studentId: student.id,
+        studentNisn: student.nisn,
+        studentName: student.name,
+        className: student.className,
+        activity: selectedActivity,
+        date: today,
+        time: nowTime,
+        status: targetStatus,
+        method: 'QR_SCAN',
+        teacher: 'Ulfatul Husna, S.Ag.,M.Pd.',
+        deviceStation: stationLabel,
+        operatorName: officerLabel,
+        syncedToSpreadsheet: true,
+        notes: targetStatus === 'Berhalangan' 
+          ? `Berhalangan sholat (Haid) via ${stationLabel} (${officerLabel})` 
+          : `Presensi QR via ${stationLabel} (${officerLabel})`,
+      };
+      onAddAttendance(newRecord);
+      setLastScanned({
+        student,
+        time: nowTime,
+        activity: selectedActivity,
+        status: targetStatus,
+        recordId: newRecord.id,
+      });
+      setScanMessage({
+        text: targetStatus === 'Berhalangan'
+          ? `🌸 TERCATAT: ${student.name} (${student.className}) - Berhalangan (Haid)`
+          : `ALHAMDULILLAH, HADIR: ${student.name} (${student.className}) - ${selectedActivity}`,
+        type: 'success',
+      });
+      if (soundEnabled) soundService.playSuccessBeep();
+    }
+  };
+
+  const recordAttendanceForStudent = (student: Student, forceStatus?: AttendanceStatus) => {
     const today = new Date().toISOString().slice(0, 10);
     const nowTime = new Date().toLocaleTimeString('id-ID', { hour12: false });
+    const targetStatus = forceStatus || (scanAttendanceModeRef.current === 'BERHALANGAN_HAID' ? 'Berhalangan' : 'Hadir');
+
+    // Validation for Haid mode: only for female students ('P')
+    if (targetStatus === 'Berhalangan' && student.gender === 'L') {
+      setScanMessage({
+        text: `PERHATIAN: ${student.name} adalah siswa laki-laki. Mode Berhalangan (Haid) khusus untuk siswi perempuan.`,
+        type: 'warning',
+      });
+      if (soundEnabled) soundService.playDuplicateBeep();
+      if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
+      return;
+    }
 
     // Check if student already scanned for this activity today
     const alreadyScanned = recentAttendance.find(
@@ -273,14 +412,23 @@ export const ScanQR: React.FC<ScanQRProps> = ({
     );
 
     if (alreadyScanned) {
-      setScanMessage({
-        text: `PERHATIAN: ${student.name} (${student.className}) SUDAH TERCATAT HADIR untuk ${selectedActivity} pada jam ${alreadyScanned.time} WIB.`,
-        type: 'warning',
-      });
-      if (soundEnabled) soundService.playDuplicateBeep();
-      if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
+      if (alreadyScanned.status === targetStatus) {
+        setScanMessage({
+          text: `PERHATIAN: ${student.name} (${student.className}) SUDAH TERCATAT ${alreadyScanned.status === 'Berhalangan' ? 'BERHALANGAN (HAID)' : 'HADIR'} untuk ${selectedActivity} pada jam ${alreadyScanned.time} WIB${alreadyScanned.deviceStation ? ` [di ${alreadyScanned.deviceStation}]` : ''}.`,
+          type: 'warning',
+        });
+        if (soundEnabled) soundService.playDuplicateBeep();
+        if (navigator.vibrate) navigator.vibrate([150, 100, 150]);
+        return;
+      }
+
+      // If status is different (e.g. was scanned Hadir, now user wants Berhalangan or vice versa):
+      handleToggleStudentStatus(student, targetStatus);
       return;
     }
+
+    const stationLabel = userRole === 'rohis' && rohisSession ? rohisSession.stationName : 'Pos Guru Pengampu';
+    const officerLabel = userRole === 'rohis' && rohisSession ? rohisSession.officerName : 'Ibu Ulfatul Husna, S.Ag.,M.Pd.';
 
     // Create new attendance record
     const newRecord: AttendanceRecord = {
@@ -292,11 +440,15 @@ export const ScanQR: React.FC<ScanQRProps> = ({
       activity: selectedActivity,
       date: today,
       time: nowTime,
-      status: 'Hadir',
+      status: targetStatus,
       method: 'QR_SCAN',
       teacher: 'Ulfatul Husna, S.Ag.,M.Pd.',
+      deviceStation: stationLabel,
+      operatorName: officerLabel,
       syncedToSpreadsheet: true,
-      notes: `Presensi digital QR Code via SIAP PAI (${selectedActivity})`,
+      notes: targetStatus === 'Berhalangan'
+        ? `Berhalangan sholat (Haid) via ${stationLabel} (${officerLabel})`
+        : `Presensi QR via ${stationLabel} (${officerLabel})`,
     };
 
     onAddAttendance(newRecord);
@@ -304,10 +456,14 @@ export const ScanQR: React.FC<ScanQRProps> = ({
       student,
       time: nowTime,
       activity: selectedActivity,
+      status: targetStatus,
+      recordId: newRecord.id,
     });
 
     setScanMessage({
-      text: `ALHAMDULILLAH, HADIR: ${student.name} (${student.className}) - ${selectedActivity}`,
+      text: targetStatus === 'Berhalangan'
+        ? `🌸 ALHAMDULILLAH, TERCATAT: ${student.name} (${student.className}) - Berhalangan (Haid)`
+        : `ALHAMDULILLAH, HADIR: ${student.name} (${student.className}) - ${selectedActivity}`,
       type: 'success',
     });
 
@@ -712,15 +868,128 @@ export const ScanQR: React.FC<ScanQRProps> = ({
     return matchClass && matchActivity;
   });
 
+  const today = new Date().toISOString().slice(0, 10);
+  const currentStationName = userRole === 'rohis' && rohisSession ? rohisSession.stationName : 'Pos Guru Pengampu';
+  const posScansToday = recentAttendance.filter(
+    (a) => a.date === today && (userRole !== 'rohis' || a.deviceStation === currentStationName)
+  );
+
+  const handleExportPosData = () => {
+    setShowExportModal(true);
+    setCopiedExport(false);
+  };
+
+  const handleDownloadPosJson = () => {
+    const jsonStr = JSON.stringify(posScansToday, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Presensi_${currentStationName.replace(/[^a-zA-Z0-9]/g, '_')}_${today}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyPosJson = () => {
+    const jsonStr = JSON.stringify(posScansToday, null, 2);
+    navigator.clipboard.writeText(jsonStr);
+    setCopiedExport(true);
+    setTimeout(() => setCopiedExport(false), 3000);
+  };
+
+  const handleProcessMerge = () => {
+    if (!mergeJsonInput.trim()) return;
+    try {
+      const parsed = JSON.parse(mergeJsonInput);
+      if (!Array.isArray(parsed)) {
+        setMergeResultMsg({ text: 'Data tidak valid. Format harus berupa array presensi JSON.', success: false });
+        return;
+      }
+      if (onBatchMergeAttendance) {
+        const res = onBatchMergeAttendance(parsed);
+        setMergeResultMsg({
+          text: `Alhamdulillah! Berhasil menggabungkan ${res.addedCount} presensi siswa baru. (${res.duplicateCount} data duplikasi diabaikan)`,
+          success: true,
+        });
+        setMergeJsonInput('');
+      }
+    } catch (err) {
+      setMergeResultMsg({
+        text: 'Format JSON salah: ' + (err instanceof Error ? err.message : String(err)),
+        success: false,
+      });
+    }
+  };
+
+  const handleFileUploadMerge = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      setMergeJsonInput(content);
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <div className="space-y-6 pb-12">
+      {/* KHUSUS MODE ROHIS: Banner Identitas Pos 1-7 & Counter */}
+      {userRole === 'rohis' && (
+        <section className="bg-gradient-to-r from-teal-900 via-emerald-950 to-teal-900 text-white rounded-2xl p-5 shadow-lg border border-teal-500/40 animate-fadeIn">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-400/50 flex items-center justify-center text-teal-300 shrink-0">
+                <Smartphone className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs bg-teal-500 text-slate-950 px-2.5 py-0.5 rounded-full font-black tracking-wide uppercase">
+                    {rohisSession?.stationName || 'Pos 1'}
+                  </span>
+                  <span className="text-xs text-teal-300 font-semibold">
+                    Petugas: <strong className="text-white">{rohisSession?.officerName || 'Tim Murid ROHIS'}</strong>
+                  </span>
+                  <span className="text-[11px] bg-teal-950/90 text-teal-200 border border-teal-500/30 px-2 py-0.5 rounded font-medium">
+                    Masjid Al Hikmah SMAN 1 Krembung
+                  </span>
+                </div>
+                <h2 className="text-lg font-bold text-white mt-1">
+                  Kegiatan Aktif: <span className="text-teal-300">{selectedActivity}</span>
+                </h2>
+                <p className="text-xs text-teal-200/80 mt-0.5">
+                  Perangkat ini terkunci khusus pemindaian QR Code presensi siswa di Masjid Al Hikmah SMAN 1 Krembung.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="bg-slate-950/60 border border-teal-500/30 px-4 py-2 rounded-xl text-center">
+                <div className="text-[10px] text-teal-300 font-bold uppercase tracking-wider">Hasil Scan Pos Ini</div>
+                <div className="text-2xl font-black text-white">{posScansToday.length} <span className="text-xs font-normal text-teal-300">Siswa</span></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleExportPosData}
+                className="px-3.5 py-2.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition shadow-md cursor-pointer whitespace-nowrap"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>Bagikan Data Pos</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Top Filter and Configuration Bar */}
       <section className="bg-white border border-slate-200 rounded-xl p-5 shadow-2xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Sistem Pemindai Universal Multi-Kamera (Laptop &amp; HP)</span>
+              <span>Sistem Pemindai Universal Multi-Perangkat (6-7 HP &amp; Laptop)</span>
             </div>
             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               <QrCode className="w-5 h-5 text-emerald-600" />
@@ -732,6 +1001,21 @@ export const ScanQR: React.FC<ScanQRProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            {/* Tombol Khusus Guru: Gabungkan Data 6-7 Perangkat ROHIS */}
+            {userRole === 'guru' && onBatchMergeAttendance && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowMergeModal(true);
+                  setMergeResultMsg(null);
+                }}
+                className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-300 text-teal-800 text-xs font-bold rounded-lg flex items-center gap-1.5 transition cursor-pointer"
+                title="Gabungkan file data dari 6-7 HP murid ROHIS"
+              >
+                <Layers className="w-3.5 h-3.5 text-teal-600" />
+                <span>Gabungkan 6-7 HP ROHIS</span>
+              </button>
+            )}
             {/* Filter Berdasarkan Kelas */}
             <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs">
               <Filter className="w-3.5 h-3.5 text-slate-500" />
@@ -777,6 +1061,84 @@ export const ScanQR: React.FC<ScanQRProps> = ({
             </button>
           </div>
         </div>
+      </section>
+
+      {/* Bar Pengatur Mode Presensi: Hadir Sholat vs Siswi Berhalangan (Haid) */}
+      <section className="bg-white border border-slate-200 rounded-xl p-3.5 shadow-2xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-bold text-slate-700">Mode Presensi:</span>
+            <div className="inline-flex rounded-lg p-1 bg-slate-100 border border-slate-200 text-xs">
+              <button
+                type="button"
+                onClick={() => setScanAttendanceMode('HADIR')}
+                className={`px-3 py-1.5 rounded-md font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  scanAttendanceMode === 'HADIR'
+                    ? 'bg-emerald-700 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Normal (Hadir Sholat)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setScanAttendanceMode('BERHALANGAN_HAID')}
+                className={`px-3 py-1.5 rounded-md font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  scanAttendanceMode === 'BERHALANGAN_HAID'
+                    ? 'bg-pink-600 text-white shadow-xs'
+                    : 'text-pink-700 hover:bg-pink-50'
+                }`}
+              >
+                <Heart className="w-3.5 h-3.5 fill-current" />
+                <span>🌸 Mode Siswi Berhalangan (Haid)</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setHaidFilterClass(selectedClass);
+                setShowHaidModal(true);
+              }}
+              className="px-3.5 py-1.5 bg-pink-50 hover:bg-pink-100 border border-pink-300 text-pink-800 text-xs font-bold rounded-lg flex items-center gap-1.5 transition cursor-pointer shadow-2xs whitespace-nowrap"
+              title="Buka daftar siswi perempuan untuk mencatat uzur haid secara manual tanpa scan kamera"
+            >
+              <Heart className="w-3.5 h-3.5 text-pink-600 fill-current" />
+              <span>Input Siswi Berhalangan (Tanpa Scan)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Banner Aktif saat Mode Siswi Berhalangan dipilih */}
+        {scanAttendanceMode === 'BERHALANGAN_HAID' && (
+          <div className="p-3 bg-gradient-to-r from-pink-900 via-rose-900 to-purple-950 text-white rounded-xl border border-pink-400 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn">
+            <div className="flex items-center gap-2.5 text-xs">
+              <div className="w-8 h-8 rounded-lg bg-pink-500/30 border border-pink-300/40 flex items-center justify-center shrink-0">
+                <Heart className="w-4 h-4 text-pink-300 fill-current" />
+              </div>
+              <div>
+                <div className="font-extrabold text-pink-200 uppercase tracking-wide text-[11px] flex items-center gap-1.5">
+                  <span>🌸 MODE KHUSUS BERHALANGAN (HAID) AKTIF</span>
+                  <span className="text-[10px] bg-pink-500/30 px-1.5 py-0.2 rounded border border-pink-300/30">Uzur Syar'i</span>
+                </div>
+                <p className="text-pink-100 text-xs mt-0.5">
+                  Scan kartu QR siswi putri yang berhalangan untuk {selectedActivity}. Otomatis dicatat sebagai uzur syar'i (tidak sholat). Siswa putra otomatis ditolak.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setScanAttendanceMode('HADIR')}
+              className="px-3 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-bold shrink-0 transition cursor-pointer self-start sm:self-center"
+            >
+              ✕ Matikan Mode Haid
+            </button>
+          </div>
+        )}
       </section>
 
       {/* Main Scanner Section Grid */}
@@ -1015,30 +1377,55 @@ export const ScanQR: React.FC<ScanQRProps> = ({
 
           {/* Scanned Student Confirmation Card */}
           {lastScanned && (
-            <div className="bg-emerald-50 border-2 border-emerald-500 rounded-xl p-4 shadow-sm animate-fadeIn">
+            <div className={`rounded-xl p-4 shadow-sm animate-fadeIn border-2 ${
+              lastScanned.status === 'Berhalangan'
+                ? 'bg-pink-50 border-pink-400'
+                : 'bg-emerald-50 border-emerald-500'
+            }`}>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-emerald-700 text-white font-bold flex items-center justify-center text-sm shadow-xs shrink-0">
+                  <div className={`w-12 h-12 rounded-full font-bold flex items-center justify-center text-sm shadow-xs shrink-0 text-white ${
+                    lastScanned.status === 'Berhalangan' ? 'bg-pink-600' : 'bg-emerald-700'
+                  }`}>
                     {lastScanned.student.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <div className="flex items-center gap-1.5 text-xs text-emerald-800 font-extrabold uppercase tracking-wider">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>Presensi Berhasil Terverifikasi</span>
+                    <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider">
+                      {lastScanned.status === 'Berhalangan' ? (
+                        <>
+                          <Heart className="w-4 h-4 text-pink-600 fill-current" />
+                          <span className="text-pink-800">🌸 Siswi Berhalangan (Haid) · Uzur Syar'i</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          <span className="text-emerald-800">Presensi Berhasil Terverifikasi</span>
+                        </>
+                      )}
                     </div>
                     <div className="text-base font-black text-slate-950 mt-0.5">
                       {lastScanned.student.name}
                     </div>
-                    <div className="text-xs text-slate-600 mt-0.5 flex items-center gap-2">
-                      <span className="font-extrabold text-emerald-800">Kelas {lastScanned.student.className}</span>
+                    <div className="text-xs text-slate-600 mt-0.5 flex items-center gap-2 flex-wrap">
+                      <span className="font-extrabold text-slate-800">Kelas {lastScanned.student.className}</span>
                       <span>·</span>
                       <span className="font-mono text-slate-600">NISN: {lastScanned.student.nisn}</span>
+                      <span>·</span>
+                      <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                        lastScanned.student.gender === 'L' ? 'bg-sky-100 text-sky-800' : 'bg-pink-100 text-pink-800'
+                      }`}>
+                        {lastScanned.student.gender === 'P' ? 'Siswi Putri (P)' : 'Siswa Putra (L)'}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-xs font-mono font-bold bg-white text-emerald-800 px-2 py-1 rounded border border-emerald-200">
+                  <span className={`text-xs font-mono font-bold px-2 py-1 rounded border ${
+                    lastScanned.status === 'Berhalangan'
+                      ? 'bg-white text-pink-800 border-pink-300'
+                      : 'bg-white text-emerald-800 border-emerald-200'
+                  }`}>
                     {lastScanned.time} WIB
                   </span>
                   <div className="text-[11px] text-slate-500 mt-1 font-medium">
@@ -1046,6 +1433,36 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                   </div>
                 </div>
               </div>
+
+              {/* Tombol Cepat Khusus Siswi Putri: Ubah status Hadir <-> Berhalangan (Haid) */}
+              {lastScanned.student.gender === 'P' && (
+                <div className="mt-3 pt-3 border-t border-slate-200/80 flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-[11px] text-slate-600 font-medium">
+                    {lastScanned.status === 'Berhalangan'
+                      ? 'Keliru input atau siswi ingin sholat?'
+                      : 'Siswi sedang uzur syar\'i / haid hari ini?'}
+                  </span>
+                  {lastScanned.status === 'Berhalangan' ? (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStudentStatus(lastScanned.student, 'Hadir')}
+                      className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Kembalikan ke: Hadir (Sholat)</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStudentStatus(lastScanned.student, 'Berhalangan')}
+                      className="px-3 py-1.5 bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <Heart className="w-3.5 h-3.5 fill-current" />
+                      <span>🌸 Ubah Status: Berhalangan (Haid)</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1095,28 +1512,52 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                   </div>
                 ) : (
                   filteredStudents.slice(0, 15).map((std) => (
-                    <button
+                    <div
                       key={std.id}
-                      onClick={() => recordAttendanceForStudent(std)}
-                      className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-emerald-50/80 border border-slate-100 hover:border-emerald-200 flex items-center justify-between transition cursor-pointer text-xs group"
+                      className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-slate-100/80 border border-slate-100 flex items-center justify-between transition text-xs"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-slate-200 group-hover:bg-emerald-200 text-slate-700 group-hover:text-emerald-800 text-[10px] font-bold flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => recordAttendanceForStudent(std)}
+                        className="flex items-center gap-2 flex-1 text-left cursor-pointer"
+                      >
+                        <div className={`w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0 ${
+                          std.gender === 'L' ? 'bg-sky-100 text-sky-800' : 'bg-pink-100 text-pink-800'
+                        }`}>
                           {std.gender}
                         </div>
                         <div>
-                          <div className="font-semibold text-slate-800 group-hover:text-emerald-900 leading-tight">
+                          <div className="font-semibold text-slate-800 leading-tight">
                             {std.name}
                           </div>
                           <div className="text-[10px] text-slate-500 font-mono">
                             {std.className} · {std.nisn}
                           </div>
                         </div>
+                      </button>
+
+                      <div className="flex items-center gap-1 shrink-0 ml-2">
+                        <button
+                          type="button"
+                          onClick={() => recordAttendanceForStudent(std, 'Hadir')}
+                          className="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-bold rounded cursor-pointer transition"
+                          title="Catat Hadir (Sholat)"
+                        >
+                          + Hadir
+                        </button>
+                        {std.gender === 'P' && (
+                          <button
+                            type="button"
+                            onClick={() => recordAttendanceForStudent(std, 'Berhalangan')}
+                            className="px-2 py-1 bg-pink-100 hover:bg-pink-200 text-pink-800 text-[10px] font-bold rounded cursor-pointer transition flex items-center gap-0.5"
+                            title="Catat Berhalangan (Haid)"
+                          >
+                            <Heart className="w-2.5 h-2.5 fill-current" />
+                            <span>Haid</span>
+                          </button>
+                        )}
                       </div>
-                      <span className="text-[10px] text-emerald-700 font-bold group-hover:underline">
-                        + Hadir
-                      </span>
-                    </button>
+                    </div>
                   ))
                 )}
               </div>
@@ -1169,16 +1610,33 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                 filteredRecentAttendance.map((rec) => (
                   <div key={rec.id} className="py-2 flex items-center justify-between text-xs">
                     <div>
-                      <div className="font-semibold text-slate-800">{rec.studentName}</div>
+                      <div className="font-semibold text-slate-800 flex items-center gap-1.5">
+                        <span>{rec.studentName}</span>
+                        {rec.deviceStation && (
+                          <span className="text-[9px] bg-teal-100 text-teal-800 px-1.5 py-0.2 rounded font-bold">
+                            {rec.deviceStation}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[10px] text-slate-500 flex items-center gap-1.5 font-mono">
                         <span>{rec.className}</span>
                         <span>·</span>
                         <span>{rec.studentNisn}</span>
+                        {rec.operatorName && (
+                          <span className="text-slate-400">· {rec.operatorName}</span>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="inline-block px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">
-                        {rec.status}
+                      <span className={`inline-block px-2 py-0.5 text-[10px] font-bold rounded ${
+                        rec.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800' :
+                        rec.status === 'Berhalangan' ? 'bg-pink-100 text-pink-800 border border-pink-300' :
+                        rec.status === 'Terlambat' ? 'bg-purple-100 text-purple-800' :
+                        rec.status === 'Sakit' ? 'bg-blue-100 text-blue-800' :
+                        rec.status === 'Izin' ? 'bg-amber-100 text-amber-800' :
+                        'bg-rose-100 text-rose-800'
+                      }`}>
+                        {rec.status === 'Berhalangan' ? 'Berhalangan (Haid)' : rec.status}
                       </span>
                       <div className="text-[10px] text-slate-400 font-mono mt-0.5">
                         {rec.time} WIB
@@ -1192,6 +1650,313 @@ export const ScanQR: React.FC<ScanQRProps> = ({
 
         </div>
       </div>
+
+      {/* MODAL 1: EKSPOR DATA POS (UNTUK PETUGAS ROHIS & GURU) */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-teal-200 space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                  <Share2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Ekspor Data {currentStationName}
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    {posScansToday.length} data presensi tercatat di perangkat ini hari ini
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowExportModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl text-xs text-teal-900 leading-relaxed">
+              <strong>Petunjuk untuk Murid ROHIS:</strong>
+              <ul className="list-disc list-inside mt-1 space-y-1 text-slate-700">
+                <li>Klik <strong>&quot;Unduh File Presensi (.json)&quot;</strong> atau <strong>&quot;Salin Kode JSON&quot;</strong>.</li>
+                <li>Kirimkan file ini via WhatsApp ke <strong>Ibu Ulfatul Husna, S.Ag.,M.Pd.</strong></li>
+                <li>Guru akan menggabungkan data dari seluruh 6-7 pos presensi secara otomatis.</li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleDownloadPosJson}
+                disabled={posScansToday.length === 0}
+                className="flex-1 py-2.5 px-4 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
+              >
+                <Download className="w-4 h-4" />
+                <span>Unduh File Presensi (.json)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyPosJson}
+                disabled={posScansToday.length === 0}
+                className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer"
+              >
+                <Copy className="w-4 h-4 text-slate-600" />
+                <span>{copiedExport ? 'Tersalin ke Clipboard!' : 'Salin Kode JSON'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: GABUNGKAN DATA 6-7 HP ROHIS (UNTUK GURU PENGAMPU) */}
+      {showMergeModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-xl w-full shadow-2xl border border-slate-200 space-y-4 animate-fadeIn max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center shrink-0">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Gabungkan Data dari 6-7 HP ROHIS
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Penggabungan multi-perangkat otomatis dengan pencegahan duplikasi
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMergeModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed space-y-1.5">
+              <p>
+                Unggah file <code className="bg-slate-200 px-1 py-0.5 rounded text-slate-800 font-mono">.json</code> yang dikirim oleh murid petugas ROHIS dari HP Pos 1 s/d Pos 7, atau tempel teks kodenya di bawah:
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Pilih File JSON dari HP Murid ROHIS:
+              </label>
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleFileUploadMerge}
+                className="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Atau Tempel (Paste) Kode JSON di Sini:
+              </label>
+              <textarea
+                value={mergeJsonInput}
+                onChange={(e) => setMergeJsonInput(e.target.value)}
+                placeholder='Tempel data JSON di sini, contoh: [{"id":"att-1", "studentNisn":"008...", ...}]'
+                rows={4}
+                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:border-teal-500"
+              />
+            </div>
+
+            {mergeResultMsg && (
+              <div className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+                mergeResultMsg.success 
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                  : 'bg-rose-50 text-rose-800 border border-rose-200'
+              }`}>
+                {mergeResultMsg.success ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> : <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />}
+                <span>{mergeResultMsg.text}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowMergeModal(false)}
+                className="px-4 py-2 text-xs text-slate-600 hover:text-slate-900 cursor-pointer"
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                onClick={handleProcessMerge}
+                disabled={!mergeJsonInput.trim()}
+                className="px-5 py-2 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-md"
+              >
+                Proses &amp; Gabungkan Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: PRESENSI CEPAT SISWI BERHALANGAN (HAID) TANPA SCAN */}
+      {showHaidModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl border border-pink-200 space-y-4 animate-fadeIn max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-pink-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center shrink-0">
+                  <Heart className="w-5 h-5 fill-current" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Presensi Siswi Berhalangan (Haid)
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Pencatatan uzur syar'i untuk siswi putri pada kegiatan <strong className="text-pink-700">{selectedActivity}</strong> (Masjid Al Hikmah)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowHaidModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Filter Kelas & Pencarian Siswi */}
+            <div className="flex flex-col sm:flex-row gap-2 pt-1">
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-full sm:w-48">
+                <Filter className="w-3.5 h-3.5 text-slate-400" />
+                <label className="text-slate-600 font-bold">Kelas:</label>
+                <select
+                  value={haidFilterClass}
+                  onChange={(e) => setHaidFilterClass(e.target.value)}
+                  className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer flex-1"
+                >
+                  <option value="Semua Kelas">Semua Kelas</option>
+                  {SCHOOL_CLASSES.map((cls) => (
+                    <option key={cls} value={cls}>Kelas {cls}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  value={haidSearchQuery}
+                  onChange={(e) => setHaidSearchQuery(e.target.value)}
+                  placeholder="Cari nama siswi atau NISN..."
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-pink-500 focus:bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Daftar Siswi Perempuan Saja */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[260px] max-h-[380px]">
+              {femaleStudentsList.length === 0 ? (
+                <div className="text-center py-10 text-xs text-slate-400">
+                  Tidak ditemukan siswi perempuan yang sesuai dengan pencarian atau filter kelas ini.
+                </div>
+              ) : (
+                femaleStudentsList.map((std) => {
+                  const todayStr = new Date().toISOString().slice(0, 10);
+                  const todayRec = recentAttendance.find(
+                    (a) => (a.studentId === std.id || a.studentNisn === std.nisn) && a.activity === selectedActivity && a.date === todayStr
+                  );
+                  const isHaid = todayRec?.status === 'Berhalangan';
+                  const isHadir = todayRec?.status === 'Hadir';
+
+                  return (
+                    <div
+                      key={std.id}
+                      className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition ${
+                        isHaid
+                          ? 'bg-pink-50/80 border-pink-300'
+                          : isHadir
+                          ? 'bg-emerald-50/60 border-emerald-200'
+                          : 'bg-white hover:bg-slate-50 border-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center shrink-0 ${
+                          isHaid
+                            ? 'bg-pink-600 text-white'
+                            : isHadir
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-slate-200 text-slate-700'
+                        }`}>
+                          P
+                        </div>
+                        <div>
+                          <div className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                            <span>{std.name}</span>
+                            {isHaid && (
+                              <span className="text-[10px] bg-pink-100 text-pink-800 px-1.5 py-0.2 rounded font-extrabold border border-pink-300">
+                                🌸 Berhalangan (Haid)
+                              </span>
+                            )}
+                            {isHadir && (
+                              <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-bold">
+                                ✓ Hadir Sholat
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-500 font-mono">
+                            Kelas {std.className} · NISN: {std.nisn}
+                            {todayRec?.time && (
+                              <span className="ml-2 text-slate-400">· Jam: {todayRec.time} WIB</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {isHaid ? (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStudentStatus(std, 'Hadir')}
+                            className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-lg transition cursor-pointer"
+                            title="Batal berhalangan & ubah ke Hadir"
+                          >
+                            Batal Haid / Sholat
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStudentStatus(std, 'Berhalangan')}
+                            className="px-3 py-1.5 bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1 shadow-xs"
+                          >
+                            <Heart className="w-3.5 h-3.5 fill-current" />
+                            <span>Catat Berhalangan</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span>Total Siswi: <strong>{femaleStudentsList.length}</strong> orang</span>
+              <button
+                type="button"
+                onClick={() => setShowHaidModal(false)}
+                className="px-4 py-1.5 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 cursor-pointer text-xs"
+              >
+                Selesai / Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
