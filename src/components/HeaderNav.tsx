@@ -302,11 +302,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           {/* Switch to ROHIS quick simulation button */}
           <button
             onClick={onSwitchToRohis}
-            title="Buka Mode Petugas Scan ROHIS (6-7 Perangkat)"
-            className="hidden xl:flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-300 hover:bg-teal-100 rounded-lg transition cursor-pointer"
+            title="Buka Mode Petugas Scan ROHIS (Pos 1 s/d Pos 7)"
+            className="flex items-center gap-1 px-2 py-1.5 text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-300 hover:bg-teal-100 rounded-lg transition cursor-pointer"
           >
             <Smartphone className="w-3.5 h-3.5 text-teal-600" />
-            <span>Mode ROHIS (6-7 HP)</span>
+            <span className="hidden md:inline">Mode ROHIS (Pos 1-7)</span>
+            <span className="md:hidden">ROHIS</span>
           </button>
 
           <button

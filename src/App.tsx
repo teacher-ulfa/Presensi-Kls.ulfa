@@ -312,9 +312,9 @@ export default function App() {
         totalSyncedRows: attendance.length + discipline.length,
       };
       setSpreadsheetConfig(updatedConfig);
-      showToast('Semua data berhasil dikirim dan disinkronkan ke Google Spreadsheet!');
+      showToast(result.message || 'Semua data berhasil dikirim dan disinkronkan ke Google Spreadsheet!');
     } else {
-      showToast('Data tersimpan lokal. Silakan periksa koneksi Webhook Google Spreadsheet.');
+      showToast(result.message || 'Data tersimpan lokal. Silakan periksa koneksi Webhook Google Spreadsheet.');
     }
   };
 

@@ -23,12 +23,15 @@ import {
   Check,
   UserCheck,
   Smartphone,
+  Users,
   Share2,
   Download,
   Copy,
   Layers,
   FileText,
-  Heart
+  Heart,
+  MessageCircle,
+  FileSpreadsheet
 } from 'lucide-react';
 import { 
   ActivityType, 
@@ -42,6 +45,7 @@ import {
   ROHIS_DEFAULT_STATIONS
 } from '../types';
 import { soundService } from '../services/soundService';
+import { spreadsheetService } from '../services/spreadsheetService';
 
 interface ScanQRProps {
   initialActivity?: ActivityType;
@@ -98,7 +102,14 @@ export const ScanQR: React.FC<ScanQRProps> = ({
   // Camera selection states
   const [availableCameras, setAvailableCameras] = useState<IdentifiedCamera[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string>('');
-  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>(() => {
+    try {
+      const saved = localStorage.getItem('siap_pai_camera_facing');
+      return (saved === 'user' || saved === 'environment') ? saved : 'environment';
+    } catch {
+      return 'environment';
+    }
+  });
   const [activeCameraLabel, setActiveCameraLabel] = useState<string>('');
   
   // Flashlight / Torch support
@@ -114,6 +125,8 @@ export const ScanQR: React.FC<ScanQRProps> = ({
   // Multi-device Modals state
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
   const [copiedExport, setCopiedExport] = useState<boolean>(false);
+  const [exportScope, setExportScope] = useState<'pos_today' | 'all_today' | 'all_history'>('pos_today');
+  const [showJsonPreview, setShowJsonPreview] = useState<boolean>(false);
   const [showMergeModal, setShowMergeModal] = useState<boolean>(false);
   const [mergeJsonInput, setMergeJsonInput] = useState<string>('');
   const [mergeResultMsg, setMergeResultMsg] = useState<{ text: string; success: boolean } | null>(null);
@@ -721,17 +734,27 @@ export const ScanQR: React.FC<ScanQRProps> = ({
     });
   };
 
-  // Toggle between rear and front camera
-  const toggleCameraFacing = async () => {
-    const nextFacing = facingMode === 'environment' ? 'user' : 'environment';
-    setFacingMode(nextFacing);
+  // Switch camera facing mode directly (environment vs user)
+  const handleSwitchFacingMode = async (newFacing: 'environment' | 'user') => {
+    setFacingMode(newFacing);
+    try {
+      localStorage.setItem('siap_pai_camera_facing', newFacing);
+    } catch (e) {
+      console.warn('Cannot write localStorage:', e);
+    }
 
     // If availableCameras has a camera with the target facing mode, select its ID
-    const targetCam = availableCameras.find((c) => c.facing === nextFacing);
+    const targetCam = availableCameras.find((c) => c.facing === newFacing);
     const targetId = targetCam ? targetCam.id : undefined;
     setSelectedCameraId(targetId || '');
 
-    await startCamera(nextFacing, targetId);
+    await startCamera(newFacing, targetId);
+  };
+
+  // Toggle between rear and front camera
+  const toggleCameraFacing = async () => {
+    const nextFacing = facingMode === 'environment' ? 'user' : 'environment';
+    await handleSwitchFacingMode(nextFacing);
   };
 
   // Switch to a specific hardware camera from dropdown
@@ -870,32 +893,95 @@ export const ScanQR: React.FC<ScanQRProps> = ({
 
   const today = new Date().toISOString().slice(0, 10);
   const currentStationName = userRole === 'rohis' && rohisSession ? rohisSession.stationName : 'Pos Guru Pengampu';
+  
+  // Data hari ini khusus pos yang sedang aktif
   const posScansToday = recentAttendance.filter(
     (a) => a.date === today && (userRole !== 'rohis' || a.deviceStation === currentStationName)
   );
 
+  // Semua presensi hari ini di perangkat ini (tanpa batasan pos)
+  const allTodayScans = recentAttendance.filter((a) => a.date === today);
+
+  // Data aktif yang dipilih untuk diekspor
+  const activeExportRecords = exportScope === 'pos_today'
+    ? (posScansToday.length > 0 ? posScansToday : (allTodayScans.length > 0 ? allTodayScans : recentAttendance))
+    : exportScope === 'all_today'
+      ? (allTodayScans.length > 0 ? allTodayScans : recentAttendance)
+      : recentAttendance;
+
   const handleExportPosData = () => {
     setShowExportModal(true);
     setCopiedExport(false);
+    // Jika pos hari ini belum ada scan, arahkan ke semua hari ini atau seluruh riwayat agar tidak 0
+    if (posScansToday.length === 0 && allTodayScans.length > 0) {
+      setExportScope('all_today');
+    } else if (posScansToday.length === 0 && allTodayScans.length === 0) {
+      setExportScope('all_history');
+    } else {
+      setExportScope('pos_today');
+    }
   };
 
   const handleDownloadPosJson = () => {
-    const jsonStr = JSON.stringify(posScansToday, null, 2);
+    const listToExport = activeExportRecords.length > 0 ? activeExportRecords : recentAttendance;
+    if (listToExport.length === 0) return;
+    const jsonStr = JSON.stringify(listToExport, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Presensi_${currentStationName.replace(/[^a-zA-Z0-9]/g, '_')}_${today}.json`;
+    const scopeTag = exportScope === 'pos_today' ? currentStationName.replace(/[^a-zA-Z0-9]/g, '_') : 'SemuaPresensi';
+    link.download = `Presensi_${scopeTag}_${today}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
   const handleCopyPosJson = () => {
-    const jsonStr = JSON.stringify(posScansToday, null, 2);
+    const listToExport = activeExportRecords.length > 0 ? activeExportRecords : recentAttendance;
+    if (listToExport.length === 0) return;
+    const jsonStr = JSON.stringify(listToExport, null, 2);
     navigator.clipboard.writeText(jsonStr);
     setCopiedExport(true);
     setTimeout(() => setCopiedExport(false), 3000);
   };
+
+  const handleDownloadPosCsv = () => {
+    const listToExport = activeExportRecords.length > 0 ? activeExportRecords : recentAttendance;
+    if (listToExport.length === 0) return;
+    spreadsheetService.exportTodayAttendanceToCSV(listToExport);
+  };
+
+  // Buat 1 data presensi simulasi untuk uji coba langsung alur ekspor-gabung jika masih kosong
+  const handleGenerateSampleAttendance = () => {
+    if (students.length === 0) return;
+    const sampleStudent = students[0];
+    const sampleRecord: AttendanceRecord = {
+      id: `att-test-${Date.now()}`,
+      studentId: sampleStudent.id,
+      studentNisn: sampleStudent.nisn,
+      studentName: sampleStudent.name,
+      className: sampleStudent.className,
+      date: today,
+      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      activity: selectedActivity,
+      status: 'Hadir',
+      method: 'QR_SCAN',
+      teacher: 'Ulfatul Husna, S.Ag.,M.Pd.',
+      deviceStation: currentStationName,
+      operatorName: userRole === 'rohis' && rohisSession ? rohisSession.officerName : 'Ibu Ulfatul Husna, S.Ag.,M.Pd.',
+      notes: 'Uji Coba Presensi Sholat'
+    };
+    onAddAttendance(sampleRecord);
+  };
+
+  const waShareText = encodeURIComponent(
+    `*LAPORAN DATA PRESENSI SHOLAT - SMAN 1 KREMBUNG*\n` +
+    `📍 Pos: ${currentStationName}\n` +
+    `📅 Tanggal: ${today}\n` +
+    `⏱️ Kegiatan: ${selectedActivity}\n` +
+    `👥 Total Siswa: ${activeExportRecords.length} orang\n\n` +
+    `_Catatan: File .json telah diunduh untuk digabungkan oleh Ibu Ulfatul Husna, S.Ag.,M.Pd. via menu 'Gabungkan 6-7 HP ROHIS'._`
+  );
 
   const handleProcessMerge = () => {
     if (!mergeJsonInput.trim()) return;
@@ -973,10 +1059,11 @@ export const ScanQR: React.FC<ScanQRProps> = ({
               <button
                 type="button"
                 onClick={handleExportPosData}
-                className="px-3.5 py-2.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition shadow-md cursor-pointer whitespace-nowrap"
+                className="px-4 py-2.5 bg-gradient-to-r from-teal-400 to-emerald-400 hover:from-teal-300 hover:to-emerald-300 text-slate-950 text-xs font-black rounded-xl flex items-center gap-2 transition shadow-lg cursor-pointer whitespace-nowrap ring-2 ring-teal-200/60"
+                title="Ekspor Data Pos: Unduh file .json atau salin kodenya"
               >
-                <Share2 className="w-4 h-4" />
-                <span>Bagikan Data Pos</span>
+                <Download className="w-4 h-4 text-slate-950" />
+                <span>Ekspor Data Pos (.json)</span>
               </button>
             </div>
           </div>
@@ -1001,6 +1088,17 @@ export const ScanQR: React.FC<ScanQRProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            {/* Tombol Ekspor Data Pos (.json) - Tersedia untuk SEMUA MODE (Guru & ROHIS) */}
+            <button
+              type="button"
+              onClick={handleExportPosData}
+              className="px-3.5 py-1.5 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-600 hover:to-emerald-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition shadow-xs cursor-pointer ring-1 ring-teal-500/50"
+              title="Ekspor Data Pos: Unduh file .json atau salin kodenya untuk penggabungan data"
+            >
+              <Download className="w-3.5 h-3.5 text-teal-200" />
+              <span>Ekspor Data Pos (.json)</span>
+            </button>
+
             {/* Tombol Khusus Guru: Gabungkan Data 6-7 Perangkat ROHIS */}
             {userRole === 'guru' && onBatchMergeAttendance && (
               <button
@@ -1148,13 +1246,88 @@ export const ScanQR: React.FC<ScanQRProps> = ({
         <div className="lg:col-span-7 space-y-4">
           <div className="bg-slate-950 rounded-2xl overflow-hidden shadow-xl border border-slate-800 text-white relative">
             
+            {/* DUA PILIHAN MODE SCAN KAMERA UNTUK HP & TABLET */}
+            <div className="bg-slate-900 border-b border-slate-800 p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Mode Scan Kamera (HP &amp; Tablet):</span>
+                </span>
+                <span className="text-[11px] font-semibold text-emerald-400">
+                  {facingMode === 'environment' ? '📱 Mode Kamera Belakang Aktif' : '🤳 Mode Kamera Depan Aktif'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleSwitchFacingMode('environment')}
+                  disabled={isStartingCamera}
+                  className={`p-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2.5 cursor-pointer disabled:opacity-50 text-left ${
+                    facingMode === 'environment'
+                      ? 'bg-emerald-600 text-white border-emerald-400 shadow-md ring-2 ring-emerald-500/30'
+                      : 'bg-slate-800/90 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    facingMode === 'environment' ? 'bg-emerald-700 text-white' : 'bg-slate-700 text-slate-300'
+                  }`}>
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="leading-tight flex items-center gap-1.5">
+                      <span>1. Kamera Belakang</span>
+                      {facingMode === 'environment' && (
+                        <span className="text-[9px] bg-emerald-800 text-emerald-100 px-1.5 py-0.2 rounded-full font-black">
+                          AKTIF
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[10px] font-normal opacity-85 mt-0.5 leading-tight">
+                      Petugas memegang HP scan kartu siswa
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSwitchFacingMode('user')}
+                  disabled={isStartingCamera}
+                  className={`p-2.5 rounded-xl border text-xs font-bold transition flex items-center gap-2.5 cursor-pointer disabled:opacity-50 text-left ${
+                    facingMode === 'user'
+                      ? 'bg-teal-600 text-white border-teal-400 shadow-md ring-2 ring-teal-500/30'
+                      : 'bg-slate-800/90 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    facingMode === 'user' ? 'bg-teal-700 text-white' : 'bg-slate-700 text-slate-300'
+                  }`}>
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="leading-tight flex items-center gap-1.5">
+                      <span>2. Kamera Depan (Kios)</span>
+                      {facingMode === 'user' && (
+                        <span className="text-[9px] bg-teal-800 text-teal-100 px-1.5 py-0.2 rounded-full font-black">
+                          AKTIF
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[10px] font-normal opacity-85 mt-0.5 leading-tight">
+                      HP/Tablet ditaruh, siswa scan sendiri
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* Top Bar inside Scanner */}
-            <div className="p-3.5 bg-slate-900 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="p-3.5 bg-slate-900/90 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full ${isScanning ? 'bg-emerald-400 animate-pulse' : isStartingCamera ? 'bg-amber-400 animate-ping' : 'bg-slate-500'}`} />
                 <span className="font-bold">
                   {isScanning 
-                    ? `Kamera Aktif: ${facingMode === 'environment' ? '📱 Kamera Belakang' : '🤳 Kamera Depan / Webcam'}` 
+                    ? `Kamera Aktif: ${facingMode === 'environment' ? '📱 Kamera Belakang' : '🤳 Kamera Depan / Kios'}` 
                     : isStartingCamera 
                     ? 'Menghubungkan Kamera...' 
                     : 'Kamera Standby'}
@@ -1206,13 +1379,13 @@ export const ScanQR: React.FC<ScanQRProps> = ({
             {/* Viewport Area: Live Video Stream + Aiming Reticle */}
             <div className="relative min-h-[340px] max-h-[460px] bg-slate-950 flex flex-col items-center justify-center overflow-hidden">
               
-              {/* Native HTML5 Video Element */}
+              {/* Native HTML5 Video Element (Horizontally mirrored in selfie/front mode for natural mirror reflection) */}
               <video
                 ref={videoRef}
                 playsInline
                 autoPlay
                 muted
-                className={`w-full h-full object-cover max-h-[460px] ${isScanning ? 'block' : 'hidden'}`}
+                className={`w-full h-full object-cover max-h-[460px] ${isScanning ? 'block' : 'hidden'} ${facingMode === 'user' ? '-scale-x-100' : ''}`}
               />
 
               {/* Aiming Reticle & Laser Scanner (Visible when camera is active) */}
@@ -1231,12 +1404,29 @@ export const ScanQR: React.FC<ScanQRProps> = ({
 
                     {/* Central scan instruction */}
                     <div className="absolute inset-x-0 bottom-3 text-center">
-                      <span className="text-[11px] font-semibold text-white/90 bg-slate-900/80 px-3 py-1 rounded-full backdrop-blur-xs border border-white/10 shadow-xs">
-                        {scanPulse ? '✓ QR CODE TERBACA!' : 'Posisikan QR code kartu di dalam kotak'}
+                      <span className="text-[11px] font-semibold text-white/90 bg-slate-900/85 px-3.5 py-1.5 rounded-full backdrop-blur-xs border border-white/10 shadow-xs">
+                        {scanPulse 
+                          ? '✓ QR CODE TERBACA!' 
+                          : facingMode === 'user'
+                          ? '🤳 Mode Kios: Hadapkan kartu QR siswa ke depan layar'
+                          : '📱 Mode Petugas: Posisikan QR code kartu di dalam kotak'}
                       </span>
                     </div>
                   </div>
                 </div>
+              )}
+
+              {/* Floating Quick Flip Camera Button in Viewfinder */}
+              {isScanning && (
+                <button
+                  type="button"
+                  onClick={toggleCameraFacing}
+                  className="absolute bottom-4 right-4 z-20 px-3.5 py-2 rounded-full bg-slate-900/85 hover:bg-emerald-600 border border-white/20 text-white shadow-xl transition active:scale-95 flex items-center gap-2 text-xs font-bold cursor-pointer backdrop-blur-sm"
+                  title={`Putar ke ${facingMode === 'environment' ? 'Kamera Depan (Kios Mandiri)' : 'Kamera Belakang (Mode Petugas)'}`}
+                >
+                  <SwitchCamera className="w-4 h-4 text-emerald-300" />
+                  <span>{facingMode === 'environment' ? 'Putar ke Kamera Depan' : 'Putar ke Kamera Belakang'}</span>
+                </button>
               )}
 
               {/* Standby State (When camera is NOT active) */}
@@ -1250,31 +1440,35 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                       Aktifkan Kamera Pemindai QR
                     </h3>
                     <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                      Mendukung <strong>Kamera Belakang HP</strong>, <strong>Webcam Laptop</strong>, maupun <strong>Kamera Depan</strong> dengan deteksi otomatis berkecepatan tinggi.
+                      Mendukung <strong>Kamera Belakang HP</strong> (Mode Petugas) maupun <strong>Kamera Depan/Webcam</strong> (Mode Kios Mandiri) dengan deteksi otomatis berkecepatan tinggi.
                     </p>
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-2">
                     <button
-                      onClick={() => startCamera('environment')}
+                      onClick={() => handleSwitchFacingMode('environment')}
                       disabled={isStartingCamera}
                       className="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      {isStartingCamera ? (
+                      {isStartingCamera && facingMode === 'environment' ? (
                         <RefreshCw className="w-4 h-4 animate-spin" />
                       ) : (
-                        <Camera className="w-4 h-4" />
+                        <Smartphone className="w-4 h-4" />
                       )}
-                      <span>📱 Buka Kamera Belakang (HP)</span>
+                      <span>📱 Buka Kamera Belakang (Petugas)</span>
                     </button>
 
                     <button
-                      onClick={() => startCamera('user')}
+                      onClick={() => handleSwitchFacingMode('user')}
                       disabled={isStartingCamera}
-                      className="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold rounded-lg shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="w-full sm:w-auto px-4 py-2.5 bg-teal-700 hover:bg-teal-600 text-white border border-teal-500 text-xs font-bold rounded-lg shadow-md transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                     >
-                      <Camera className="w-4 h-4 text-emerald-400" />
-                      <span>💻 Webcam Laptop / Depan</span>
+                      {isStartingCamera && facingMode === 'user' ? (
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Users className="w-4 h-4" />
+                      )}
+                      <span>🤳 Buka Kamera Depan (Kios Mandiri)</span>
                     </button>
                   </div>
                 </div>
@@ -1301,7 +1495,7 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                     >
                       <SwitchCamera className="w-4 h-4" />
                       <span>
-                        Putar ke {facingMode === 'environment' ? 'Kamera Depan' : 'Kamera Belakang'}
+                        Putar ke {facingMode === 'environment' ? 'Kamera Depan (Kios)' : 'Kamera Belakang (Petugas)'}
                       </span>
                     </button>
                   </>
@@ -1312,7 +1506,7 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                     className="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
                   >
                     <Camera className="w-3.5 h-3.5" />
-                    <span>Mulai Pindai Kamera</span>
+                    <span>Mulai Pindai ({facingMode === 'environment' ? 'Kamera Belakang' : 'Kamera Depan'})</span>
                   </button>
                 )}
 
@@ -1333,6 +1527,17 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                 >
                   <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
                   <span>{isProcessingFile ? 'Membaca...' : 'Unggah Foto QR'}</span>
+                </button>
+
+                {/* Ekspor Cepat Data Pos */}
+                <button
+                  type="button"
+                  onClick={handleExportPosData}
+                  className="px-3 py-1.5 bg-teal-900/90 hover:bg-teal-800 text-teal-200 border border-teal-700/80 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition cursor-pointer"
+                  title="Ekspor Data Pos: Unduh file .json atau salin kodenya"
+                >
+                  <Download className="w-3.5 h-3.5 text-teal-300" />
+                  <span>Ekspor Pos (.json)</span>
                 </button>
               </div>
 
@@ -1654,18 +1859,22 @@ export const ScanQR: React.FC<ScanQRProps> = ({
       {/* MODAL 1: EKSPOR DATA POS (UNTUK PETUGAS ROHIS & GURU) */}
       {showExportModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-teal-200 space-y-4 animate-fadeIn">
-            <div className="flex items-center justify-between">
+          <div className="bg-white rounded-2xl p-6 max-w-xl w-full shadow-2xl border border-teal-200 space-y-4 animate-fadeIn max-h-[92vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
-                  <Share2 className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <Download className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">
-                    Ekspor Data {currentStationName}
+                  <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <span>Ekspor Data Pos Presensi (.json)</span>
+                    <span className="text-[10px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full font-bold">
+                      {currentStationName}
+                    </span>
                   </h3>
                   <p className="text-xs text-slate-500">
-                    {posScansToday.length} data presensi tercatat di perangkat ini hari ini
+                    Unduh file .json atau salin kodenya untuk digabungkan ke laptop Guru Pengampu
                   </p>
                 </div>
               </div>
@@ -1678,21 +1887,111 @@ export const ScanQR: React.FC<ScanQRProps> = ({
               </button>
             </div>
 
-            <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl text-xs text-teal-900 leading-relaxed">
-              <strong>Petunjuk untuk Murid ROHIS:</strong>
-              <ul className="list-disc list-inside mt-1 space-y-1 text-slate-700">
-                <li>Klik <strong>&quot;Unduh File Presensi (.json)&quot;</strong> atau <strong>&quot;Salin Kode JSON&quot;</strong>.</li>
-                <li>Kirimkan file ini via WhatsApp ke <strong>Ibu Ulfatul Husna, S.Ag.,M.Pd.</strong></li>
-                <li>Guru akan menggabungkan data dari seluruh 6-7 pos presensi secara otomatis.</li>
-              </ul>
+            {/* Pilihan Cakupan Data (Scope Selector) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Pilih Cakupan Data yang Ingin Diekspor:
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setExportScope('pos_today')}
+                  className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
+                    exportScope === 'pos_today'
+                      ? 'bg-teal-50 border-teal-500 ring-2 ring-teal-200'
+                      : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-teal-700">Pos Ini Hari Ini</div>
+                  <div className="text-lg font-black text-slate-900">
+                    {posScansToday.length} <span className="text-xs font-normal text-slate-500">siswa</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500 truncate">{currentStationName}</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setExportScope('all_today')}
+                  className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
+                    exportScope === 'all_today'
+                      ? 'bg-teal-50 border-teal-500 ring-2 ring-teal-200'
+                      : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-teal-700">Semua Hari Ini</div>
+                  <div className="text-lg font-black text-slate-900">
+                    {allTodayScans.length} <span className="text-xs font-normal text-slate-500">siswa</span>
+                  </div>
+                  <div className="text-[10px] text-slate-500">Di HP/perangkat ini</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setExportScope('all_history')}
+                  className={`p-2.5 rounded-xl border text-left transition cursor-pointer ${
+                    exportScope === 'all_history'
+                      ? 'bg-teal-50 border-teal-500 ring-2 ring-teal-200'
+                      : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-teal-700">Seluruh Riwayat</div>
+                  <div className="text-lg font-black text-slate-900">
+                    {recentAttendance.length} <span className="text-xs font-normal text-slate-500">siswa</span>
+                  </div>
+                  <div className="text-[10px] text-emerald-700 font-semibold">Uji coba &amp; Backup</div>
+                </button>
+              </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            {/* Zero State Alert with Sample Generator */}
+            {activeExportRecords.length === 0 && (
+              <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-xl text-xs text-amber-950 space-y-2">
+                <div className="flex items-start gap-2 font-bold">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>Belum ada data presensi pada pilihan ini.</span>
+                </div>
+                <p className="text-slate-700 leading-relaxed pl-6">
+                  Perangkat ini belum mencatat pemindaian siswa hari ini. Anda bisa melakukan 1x scan kartu siswa atau klik tombol di bawah untuk membuat 1 data uji coba presensi sholat agar bisa langsung menguji coba ekspor dan penggabungan ke laptop Guru:
+                </p>
+                <div className="pl-6 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleGenerateSampleAttendance}
+                    className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
+                  >
+                    + Buat 1 Contoh Presensi Uji Coba Sekarang
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Alur Panduan 3 Langkah */}
+            <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl text-xs text-teal-950 space-y-1.5 leading-relaxed">
+              <div className="font-bold flex items-center gap-1.5 text-teal-900">
+                <Sparkles className="w-3.5 h-3.5 text-teal-700" />
+                <span>Alur Penggunaan Multi-Perangkat (6-7 HP ROHIS &amp; Laptop Guru):</span>
+              </div>
+              <ol className="list-decimal list-inside space-y-1 text-slate-700 pl-1">
+                <li>
+                  Klik <strong>&quot;Unduh File Presensi (.json)&quot;</strong> atau <strong>&quot;Salin Kode JSON&quot;</strong> di bawah.
+                </li>
+                <li>
+                  Kirimkan file <code className="bg-white px-1.5 py-0.2 rounded border border-teal-200 text-teal-800 font-mono">.json</code> via WhatsApp ke <strong>Ibu Ulfatul Husna, S.Ag.,M.Pd.</strong>
+                </li>
+                <li>
+                  Di laptop Guru, buka menu <strong>Scan QR</strong> lalu klik <strong>&quot;Gabungkan 6-7 HP ROHIS&quot;</strong> untuk menyatukan seluruh data secara otomatis (anti-duplikasi).
+                </li>
+              </ol>
+            </div>
+
+            {/* Tombol-tombol Aksi Ekspor */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               <button
                 type="button"
                 onClick={handleDownloadPosJson}
-                disabled={posScansToday.length === 0}
-                className="flex-1 py-2.5 px-4 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
+                disabled={activeExportRecords.length === 0}
+                className="py-2.5 px-4 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+                title="Unduh file .json yang siap digabungkan di laptop Guru"
               >
                 <Download className="w-4 h-4" />
                 <span>Unduh File Presensi (.json)</span>
@@ -1701,13 +2000,58 @@ export const ScanQR: React.FC<ScanQRProps> = ({
               <button
                 type="button"
                 onClick={handleCopyPosJson}
-                disabled={posScansToday.length === 0}
-                className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer"
+                disabled={activeExportRecords.length === 0}
+                className={`py-2.5 px-4 border text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer ${
+                  copiedExport
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-800'
+                }`}
+                title="Salin seluruh kode data JSON ke clipboard untuk ditempel di WA"
               >
-                <Copy className="w-4 h-4 text-slate-600" />
-                <span>{copiedExport ? 'Tersalin ke Clipboard!' : 'Salin Kode JSON'}</span>
+                {copiedExport ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4 text-slate-600" />}
+                <span>{copiedExport ? '✓ Tersalin ke Clipboard!' : 'Salin Kode JSON'}</span>
+              </button>
+
+              <a
+                href={`https://wa.me/?text=${waShareText}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+                title="Kirim pemberitahuan presensi pos ke WhatsApp Guru"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Kirim Format WhatsApp</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={handleDownloadPosCsv}
+                disabled={activeExportRecords.length === 0}
+                className="py-2.5 px-4 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-100 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition cursor-pointer shadow-sm"
+                title="Unduh data dalam format CSV/Excel untuk dibuka di komputer"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                <span>Unduh File Excel/CSV (.csv)</span>
               </button>
             </div>
+
+            {/* Toggle Pratinjau Kode JSON */}
+            {activeExportRecords.length > 0 && (
+              <div className="pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowJsonPreview(!showJsonPreview)}
+                  className="text-xs text-teal-800 hover:text-teal-950 font-bold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>{showJsonPreview ? '▼ Sembunyikan' : '▶ Lihat'} Pratinjau Kode JSON ({activeExportRecords.length} siswa)</span>
+                </button>
+                {showJsonPreview && (
+                  <pre className="mt-2 p-3 bg-slate-900 text-teal-300 text-[10px] font-mono rounded-xl max-h-48 overflow-y-auto leading-tight border border-slate-800">
+                    {JSON.stringify(activeExportRecords, null, 2)}
+                  </pre>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
