@@ -39,6 +39,7 @@ interface HeaderNavProps {
   rohisSession?: RohisSession | null;
   onSwitchToGuru: (password: string) => boolean;
   onSwitchToRohis: () => void;
+  unsyncedCount?: number;
 }
 
 const LOGO_SMANIKRE = "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhjhEe7DsQaweQWtckuBY0QdRPB_J0RbHqfSXb0fFnNGOQYwfzbn9SyTV1WORteNpd7S3rcGj3FYpaCf0X7tjQpcXoDfErD-aWPD9kTf-6auJIoAZ3ETmXpvuoVydS7H87HO-vidqv4ECyayUG4dFJNZNMuVWD2lUyaMaF7ox5BYCfAksicgx7ryvy6V56Z/s1600/LOGO%20SMANIKRE%20(1).png";
@@ -53,6 +54,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
   rohisSession,
   onSwitchToGuru,
   onSwitchToRohis,
+  unsyncedCount = 0,
 }) => {
   const [showSwitchModal, setShowSwitchModal] = useState(false);
   const [switchPassword, setSwitchPassword] = useState('');
@@ -66,7 +68,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
     { id: 'catatan-kedisiplinan', label: 'Kedisiplinan', icon: <AlertTriangle className="w-4 h-4" /> },
     { id: 'rekap-presensi', label: 'Rekap Presensi', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'cetak-qr', label: 'Cetak Kartu QR', icon: <Printer className="w-4 h-4" />, badge: 'AKTIF' },
-    { id: 'spreadsheet', label: 'Spreadsheet', icon: <FileSpreadsheet className="w-4 h-4" /> },
+    { 
+      id: 'spreadsheet', 
+      label: 'Spreadsheet', 
+      icon: <FileSpreadsheet className="w-4 h-4" />,
+      badge: unsyncedCount > 0 ? `${unsyncedCount} BARU` : undefined
+    },
   ];
 
   const handleConfirmSwitchToGuru = () => {
@@ -313,11 +320,16 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           <button
             onClick={onSyncSpreadsheet}
             disabled={isSyncing}
-            title="Kirim dan sinkronkan semua data ke Google Spreadsheet"
+            title={unsyncedCount > 0 ? `Kirim ${unsyncedCount} data baru ke Google Spreadsheet` : 'Semua data telah tersinkronkan ke Spreadsheet'}
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-lg transition disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-600' : ''}`} />
             <span>{isSyncing ? 'Mengirim...' : 'Kirim Spreadsheet'}</span>
+            {unsyncedCount > 0 && (
+              <span className="bg-amber-500 text-slate-950 font-black text-[10px] px-1.5 py-0.2 rounded-full">
+                {unsyncedCount}
+              </span>
+            )}
           </button>
 
           <button

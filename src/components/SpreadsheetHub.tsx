@@ -18,7 +18,9 @@ import {
   ChevronUp,
   Calendar,
   Layers,
-  AlertTriangle
+  AlertTriangle,
+  RotateCcw,
+  Trash2
 } from 'lucide-react';
 import { AttendanceRecord, DisciplineRecord, SpreadsheetConfig } from '../types';
 import { spreadsheetService, SyncResult } from '../services/spreadsheetService';
@@ -29,6 +31,8 @@ interface SpreadsheetHubProps {
   attendanceRecords: AttendanceRecord[];
   disciplineRecords: DisciplineRecord[];
   onManualSync: () => void;
+  onSyncOnlyUnsynced?: () => void;
+  onResetSyncedData?: (action: 'clear_synced' | 'mark_all_synced' | 'mark_all_unsynced') => void;
   isSyncing: boolean;
   lastSyncResult: SyncResult | null;
 }
@@ -39,17 +43,27 @@ export const SpreadsheetHub: React.FC<SpreadsheetHubProps> = ({
   attendanceRecords,
   disciplineRecords,
   onManualSync,
+  onSyncOnlyUnsynced,
+  onResetSyncedData,
   isSyncing,
   lastSyncResult,
 }) => {
   const [activeSheetTab, setActiveSheetTab] = useState<'presensi' | 'kedisiplinan' | 'panduan'>('presensi');
   const [copiedCode, setCopiedCode] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
   const [formConfig, setFormConfig] = useState<SpreadsheetConfig>(config);
   const [showTroubleshoot, setShowTroubleshoot] = useState(true);
   const [filterTodayOnly, setFilterTodayOnly] = useState(false);
   const [testingWebhook, setTestingWebhook] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const syncedAttendanceCount = attendanceRecords.filter((r) => r.syncedToSpreadsheet).length;
+  const unsyncedAttendanceCount = attendanceRecords.filter((r) => !r.syncedToSpreadsheet).length;
+  const syncedDisciplineCount = disciplineRecords.filter((d) => d.syncedToSpreadsheet).length;
+  const unsyncedDisciplineCount = disciplineRecords.filter((d) => !d.syncedToSpreadsheet).length;
+  const totalUnsynced = unsyncedAttendanceCount + unsyncedDisciplineCount;
+  const totalSynced = syncedAttendanceCount + syncedDisciplineCount;
 
   const today = new Date().toISOString().slice(0, 10);
   const todayAttendance = attendanceRecords.filter((r) => r.date === today);
@@ -107,25 +121,57 @@ export const SpreadsheetHub: React.FC<SpreadsheetHubProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            {/* 1. Kirim Data Baru (Hanya yang belum tersinkronisasi) */}
+            {onSyncOnlyUnsynced && totalUnsynced > 0 ? (
+              <button
+                type="button"
+                onClick={onSyncOnlyUnsynced}
+                disabled={isSyncing}
+                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 text-xs font-black rounded-lg shadow-md flex items-center gap-2 transition disabled:opacity-50 cursor-pointer animate-pulse ring-2 ring-emerald-300/60"
+                title="Kirim hanya data baru yang belum pernah masuk ke spreadsheet (mencegah data ganda)"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                <span>Kirim Data Baru ({totalUnsynced} Belum Terkirim)</span>
+              </button>
+            ) : null}
+
+            {/* 2. Kirim Semua Sekarang */}
             <button
+              type="button"
               onClick={onManualSync}
               disabled={isSyncing}
-              className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-lg shadow-md flex items-center gap-2 transition disabled:opacity-50 cursor-pointer"
+              className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg shadow-md flex items-center gap-2 transition disabled:opacity-50 cursor-pointer"
+              title="Kirim seluruh data presensi dan kedisiplinan ke spreadsheet"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-              <span>{isSyncing ? 'Mengirim Data...' : 'Kirim Semua Sekarang'}</span>
+              <span>{isSyncing ? 'Mengirim Data...' : 'Kirim Semua Data'}</span>
             </button>
 
+            {/* 3. Tombol Reset Data yang Sudah Berhasil Dikirim ke Spreadsheet */}
             <button
+              type="button"
+              onClick={() => setShowResetModal(true)}
+              className="px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/50 text-xs font-bold rounded-lg flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+              title="Kelola & reset data yang sudah berhasil masuk ke spreadsheet agar antrean bersih dan tidak terkirim berulang"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-amber-300" />
+              <span>Reset Data Terkirim ({totalSynced})</span>
+            </button>
+
+            {/* 4. Unduh CSV Hari Ini */}
+            <button
+              type="button"
               onClick={() => spreadsheetService.exportTodayAttendanceToCSV(attendanceRecords)}
-              className="px-3.5 py-2 bg-teal-800 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg border border-teal-600 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+              className="px-3 py-2 bg-teal-800 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg border border-teal-600 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
               title="Unduh presensi khusus hari ini ke file CSV/Excel langsung"
             >
               <Download className="w-3.5 h-3.5 text-teal-300" />
-              <span>Unduh CSV Hari Ini</span>
+              <span>Unduh CSV</span>
             </button>
 
+            {/* 5. Unduh JSON */}
             <button
+              type="button"
               onClick={() => {
                 const todayStr = new Date().toISOString().slice(0, 10);
                 const todayRecs = attendanceRecords.filter(a => a.date === todayStr);
@@ -139,14 +185,16 @@ export const SpreadsheetHub: React.FC<SpreadsheetHubProps> = ({
                 link.click();
                 URL.revokeObjectURL(url);
               }}
-              className="px-3.5 py-2 bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg border border-emerald-600 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+              className="px-3 py-2 bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg border border-emerald-600 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
               title="Unduh data presensi dalam format file .JSON"
             >
               <Download className="w-3.5 h-3.5 text-emerald-300" />
-              <span>Unduh File .JSON</span>
+              <span>Unduh .JSON</span>
             </button>
 
+            {/* 6. Buka Spreadsheet */}
             <button
+              type="button"
               onClick={openGoogleSpreadsheetTab}
               className="px-3 py-2 bg-slate-800/80 hover:bg-slate-800 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1.5 transition cursor-pointer"
               title="Buka dokumen Google Spreadsheet di tab baru"
@@ -155,7 +203,9 @@ export const SpreadsheetHub: React.FC<SpreadsheetHubProps> = ({
               <span>Buka Sheets</span>
             </button>
 
+            {/* 7. Konfigurasi Webhook */}
             <button
+              type="button"
               onClick={() => {
                 setFormConfig(config);
                 setTestResult(null);
@@ -164,12 +214,12 @@ export const SpreadsheetHub: React.FC<SpreadsheetHubProps> = ({
               className="px-3 py-2 bg-slate-800/80 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1.5 transition cursor-pointer"
             >
               <Settings className="w-3.5 h-3.5" />
-              <span>Konfigurasi Webhook</span>
+              <span>Konfigurasi</span>
             </button>
           </div>
         </div>
 
-        {/* Sync Status Bar */}
+        {/* Sync Status Bar with Clear Synced vs Unsynced Breakdown */}
         <div className="mt-5 pt-4 border-t border-emerald-500/20 flex flex-wrap items-center justify-between text-xs text-emerald-200/90 gap-2">
           <div className="flex flex-wrap items-center gap-3">
             {isValidWebhook ? (
@@ -189,11 +239,17 @@ export const SpreadsheetHub: React.FC<SpreadsheetHubProps> = ({
               </span>
             )}
             <span>·</span>
-            <span>Presensi Hari Ini: <strong className="text-white font-mono">{todayAttendance.length}</strong> siswa</span>
+            <span>Total Presensi: <strong className="text-white font-mono">{attendanceRecords.length}</strong></span>
             <span>·</span>
-            <span>Total Semua Presensi: <strong className="text-white font-mono">{attendanceRecords.length}</strong></span>
+            <span className="text-emerald-300 font-medium">
+              ✅ Sudah Masuk Sheets: <strong className="text-white font-mono">{syncedAttendanceCount}</strong>
+            </span>
             <span>·</span>
-            <span>Catatan Disiplin: <strong className="text-white font-mono">{disciplineRecords.length}</strong></span>
+            <span className={`${unsyncedAttendanceCount > 0 ? 'text-amber-300 font-bold' : 'text-slate-300'}`}>
+              ⏳ Belum Terkirim: <strong className="font-mono text-white">{unsyncedAttendanceCount}</strong>
+            </span>
+            <span>·</span>
+            <span>Disiplin: <strong className="text-white font-mono">{disciplineRecords.length}</strong> ({syncedDisciplineCount} tersinkron)</span>
           </div>
 
           <div className="text-[11px] text-slate-300">
@@ -761,6 +817,146 @@ export const SpreadsheetHub: React.FC<SpreadsheetHubProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL RESET DATA TERKIRIM KE SPREADSHEET */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-xl w-full shadow-2xl border border-amber-200 space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                  <RotateCcw className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Reset &amp; Bersihkan Data Terkirim Spreadsheet
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Cegah data terkirim berulang kali atau bersihkan antrean data yang sudah sukses masuk ke Google Sheets.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Status Summary Banner */}
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs flex items-center justify-between gap-3">
+              <div>
+                <span className="text-slate-500">Data Sudah Terkirim (Aman di Sheets):</span>
+                <div className="font-extrabold text-emerald-700 text-sm">
+                  {syncedAttendanceCount} Presensi · {syncedDisciplineCount} Catatan Disiplin
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-slate-500">Data Baru (Belum Masuk Sheets):</span>
+                <div className="font-extrabold text-amber-700 text-sm">
+                  {unsyncedAttendanceCount} Presensi · {unsyncedDisciplineCount} Catatan Disiplin
+                </div>
+              </div>
+            </div>
+
+            {/* 3 Action Options */}
+            <div className="space-y-3 text-xs">
+              {/* Opsi 1: Bersihkan Data yang Sudah Terkirim dari Antrean Lokal */}
+              <div className="p-3.5 bg-rose-50/60 hover:bg-rose-50 border border-rose-200 rounded-xl space-y-2 transition">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <Trash2 className="w-4 h-4 text-rose-600" />
+                    <span>Opsi 1: Bersihkan Data yang Sudah Masuk Spreadsheet (Disarankan)</span>
+                  </div>
+                  <span className="text-[10px] bg-rose-100 text-rose-800 font-extrabold px-2 py-0.5 rounded-full">
+                    Kosongkan Antrean
+                  </span>
+                </div>
+                <p className="text-slate-600 leading-relaxed text-[11px]">
+                  Menghapus {totalSynced} data yang sudah <strong>100% tersimpan aman di Google Spreadsheet</strong> dari memori aplikasi di perangkat ini. Data baru yang belum terkirim ({totalUnsynced}) tetap tersimpan aman. Dengan ini, antrean lokal bersih kembali dan <strong>data lama dijamin tidak akan pernah terkirim berulang ke spreadsheet</strong>.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onResetSyncedData) {
+                      onResetSyncedData('clear_synced');
+                    }
+                    setShowResetModal(false);
+                  }}
+                  disabled={totalSynced === 0}
+                  className="w-full py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold rounded-lg text-xs shadow-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Bersihkan {totalSynced} Data Terkirim dari Antrean Lokal Sekarang</span>
+                </button>
+              </div>
+
+              {/* Opsi 2: Tandai Semua Data Sebagai 'Sudah Terkirim' */}
+              <div className="p-3.5 bg-emerald-50/60 hover:bg-emerald-50 border border-emerald-200 rounded-xl space-y-2 transition">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>Opsi 2: Tandai Seluruh Data Saat Ini Sebagai &quot;Sudah Terkirim&quot;</span>
+                  </div>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                    Kunci Riwayat
+                  </span>
+                </div>
+                <p className="text-slate-600 leading-relaxed text-[11px]">
+                  Tetap menyimpan seluruh {attendanceRecords.length} riwayat presensi di HP/laptop, namun mengunci statusnya menjadi &quot;Sudah Terkirim&quot;. Tombol <strong>&quot;Kirim Data Baru&quot;</strong> selanjutnya hanya akan mengirim siswa yang baru dipresensi berikutnya.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onResetSyncedData) {
+                      onResetSyncedData('mark_all_synced');
+                    }
+                    setShowResetModal(false);
+                  }}
+                  className="w-full py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg text-xs shadow-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Tandai Semua ({attendanceRecords.length}) Data Sebagai Sudah Terkirim</span>
+                </button>
+              </div>
+
+              {/* Opsi 3: Reset Status Pengiriman (Kirim Ulang Semua) */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+                <div>
+                  <div className="font-bold text-slate-800 text-xs">Opsi 3: Reset Status (Tandai Siap Kirim Ulang)</div>
+                  <p className="text-[11px] text-slate-500">
+                    Tandai seluruh data sebagai belum terkirim jika Anda baru saja memasang URL Google Spreadsheet baru.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onResetSyncedData) {
+                      onResetSyncedData('mark_all_unsynced');
+                    }
+                    setShowResetModal(false);
+                  }}
+                  className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-lg text-xs transition cursor-pointer shrink-0"
+                >
+                  Reset Status
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg text-xs cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
           </div>
         </div>
       )}

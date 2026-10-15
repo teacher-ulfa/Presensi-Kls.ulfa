@@ -98,6 +98,16 @@ export const ScanQR: React.FC<ScanQRProps> = ({
   const [showHaidModal, setShowHaidModal] = useState<boolean>(false);
   const [haidSearchQuery, setHaidSearchQuery] = useState<string>('');
   const [haidFilterClass, setHaidFilterClass] = useState<string>('Semua Kelas');
+
+  // Modal Presensi Cepat Murid Lupa Bawa Kartu QR (Semua Siswa L & P dari Semua Kelas)
+  const [showManualStudentModal, setShowManualStudentModal] = useState<boolean>(false);
+  const [manualStudentSearchQuery, setManualStudentSearchQuery] = useState<string>('');
+  const [manualStudentFilterClass, setManualStudentFilterClass] = useState<string>('Semua Kelas');
+  const [manualStudentFilterGender, setManualStudentFilterGender] = useState<'ALL' | 'L' | 'P'>('ALL');
+
+  // Quick inline search under camera
+  const [quickSearchInput, setQuickSearchInput] = useState<string>('');
+  const [showQuickDropdown, setShowQuickDropdown] = useState<boolean>(false);
   
   // Camera selection states
   const [availableCameras, setAvailableCameras] = useState<IdentifiedCamera[]>([]);
@@ -328,6 +338,27 @@ export const ScanQR: React.FC<ScanQRProps> = ({
     return matchClass && matchQuery;
   });
 
+  // List murid untuk Modal Presensi Cepat Murid Lupa Kartu QR (Semua Siswa L & P)
+  const filteredManualStudents = students.filter((s) => {
+    const matchClass = manualStudentFilterClass === 'Semua Kelas' || s.className === manualStudentFilterClass;
+    const matchGender = manualStudentFilterGender === 'ALL' || s.gender === manualStudentFilterGender;
+    const q = manualStudentSearchQuery.toLowerCase().trim();
+    const matchQuery = !q ||
+      s.name.toLowerCase().includes(q) ||
+      s.nisn.includes(q) ||
+      s.nis.includes(q) ||
+      s.className.toLowerCase().includes(q);
+    return matchClass && matchGender && matchQuery;
+  });
+
+  // Pencarian cepat langsung di bawah kamera pemindai (ketik 2 huruf langsung muncul)
+  const quickSearchMatches = quickSearchInput.trim().length >= 2
+    ? students.filter((s) => {
+        const q = quickSearchInput.toLowerCase().trim();
+        return s.name.toLowerCase().includes(q) || s.nisn.includes(q) || s.className.toLowerCase().includes(q);
+      }).slice(0, 6)
+    : [];
+
   const handleToggleStudentStatus = (student: Student, targetStatus: AttendanceStatus) => {
     const today = new Date().toISOString().slice(0, 10);
     const existing = recentAttendance.find(
@@ -342,9 +373,10 @@ export const ScanQR: React.FC<ScanQRProps> = ({
       const updated: AttendanceRecord = {
         ...existing,
         status: targetStatus,
+        syncedToSpreadsheet: false, // Menandai data berubah dan perlu disinkronkan
         notes: targetStatus === 'Berhalangan' 
           ? `Berhalangan sholat (Haid) via ${stationLabel} (${officerLabel})` 
-          : `Presensi Hadir via ${stationLabel} (${officerLabel})`,
+          : `Presensi ${targetStatus} via ${stationLabel} (${officerLabel})`,
       };
       if (onUpdateAttendance) {
         onUpdateAttendance(updated);
@@ -361,7 +393,7 @@ export const ScanQR: React.FC<ScanQRProps> = ({
       setScanMessage({
         text: targetStatus === 'Berhalangan' 
           ? `🌸 Status ${student.name} diperbarui menjadi: Berhalangan (Haid).` 
-          : `✓ Status ${student.name} diperbarui menjadi: Hadir (Sholat).`,
+          : `✓ Status ${student.name} diperbarui menjadi: ${targetStatus}.`,
         type: 'success',
       });
       if (soundEnabled) soundService.playSuccessBeep();
@@ -376,14 +408,14 @@ export const ScanQR: React.FC<ScanQRProps> = ({
         date: today,
         time: nowTime,
         status: targetStatus,
-        method: 'QR_SCAN',
+        method: 'MANUAL',
         teacher: 'Ulfatul Husna, S.Ag.,M.Pd.',
         deviceStation: stationLabel,
         operatorName: officerLabel,
-        syncedToSpreadsheet: true,
+        syncedToSpreadsheet: false, // Belum terkirim ke spreadsheet (antrean pending baru)
         notes: targetStatus === 'Berhalangan' 
           ? `Berhalangan sholat (Haid) via ${stationLabel} (${officerLabel})` 
-          : `Presensi QR via ${stationLabel} (${officerLabel})`,
+          : `Input Manual (${targetStatus}) via ${stationLabel} (${officerLabel})`,
       };
       onAddAttendance(newRecord);
       setLastScanned({
@@ -396,7 +428,7 @@ export const ScanQR: React.FC<ScanQRProps> = ({
       setScanMessage({
         text: targetStatus === 'Berhalangan'
           ? `🌸 TERCATAT: ${student.name} (${student.className}) - Berhalangan (Haid)`
-          : `ALHAMDULILLAH, HADIR: ${student.name} (${student.className}) - ${selectedActivity}`,
+          : `ALHAMDULILLAH, TERCATAT ${targetStatus.toUpperCase()}: ${student.name} (${student.className}) - ${selectedActivity}`,
         type: 'success',
       });
       if (soundEnabled) soundService.playSuccessBeep();
@@ -458,7 +490,7 @@ export const ScanQR: React.FC<ScanQRProps> = ({
       teacher: 'Ulfatul Husna, S.Ag.,M.Pd.',
       deviceStation: stationLabel,
       operatorName: officerLabel,
-      syncedToSpreadsheet: true,
+      syncedToSpreadsheet: false,
       notes: targetStatus === 'Berhalangan'
         ? `Berhalangan sholat (Haid) via ${stationLabel} (${officerLabel})`
         : `Presensi QR via ${stationLabel} (${officerLabel})`,
@@ -1099,6 +1131,21 @@ export const ScanQR: React.FC<ScanQRProps> = ({
               <span>Ekspor Data Pos (.json)</span>
             </button>
 
+            {/* Tombol Input Murid Lupa Kartu QR (Semua Kelas) */}
+            <button
+              type="button"
+              onClick={() => {
+                setManualStudentFilterClass('Semua Kelas');
+                setManualStudentSearchQuery('');
+                setShowManualStudentModal(true);
+              }}
+              className="px-3.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-bold rounded-lg flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+              title="Murid lupa bawa kartu QR? Cari nama murid dari semua kelas dan catat 1-klik"
+            >
+              <UserCheck className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Input Murid Lupa Kartu</span>
+            </button>
+
             {/* Tombol Khusus Guru: Gabungkan Data 6-7 Perangkat ROHIS */}
             {userRole === 'guru' && onBatchMergeAttendance && (
               <button
@@ -1195,7 +1242,21 @@ export const ScanQR: React.FC<ScanQRProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setManualStudentFilterClass('Semua Kelas');
+                setManualStudentSearchQuery('');
+                setShowManualStudentModal(true);
+              }}
+              className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition cursor-pointer shadow-xs whitespace-nowrap"
+              title="Murid lupa bawa kartu QR? Cari nama murid dari semua kelas dan catat hadir 1-klik"
+            >
+              <UserCheck className="w-3.5 h-3.5 text-emerald-200" />
+              <span>Input Murid Lupa Kartu (1-2 Murid)</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -1206,7 +1267,7 @@ export const ScanQR: React.FC<ScanQRProps> = ({
               title="Buka daftar siswi perempuan untuk mencatat uzur haid secara manual tanpa scan kamera"
             >
               <Heart className="w-3.5 h-3.5 text-pink-600 fill-current" />
-              <span>Input Siswi Berhalangan (Tanpa Scan)</span>
+              <span>Input Siswi Berhalangan (Haid)</span>
             </button>
           </div>
         </div>
@@ -1539,6 +1600,35 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                   <Download className="w-3.5 h-3.5 text-teal-300" />
                   <span>Ekspor Pos (.json)</span>
                 </button>
+
+                {/* Input Cepat Murid Lupa Kartu QR Langsung di bawah Kamera */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setManualStudentFilterClass('Semua Kelas');
+                    setManualStudentSearchQuery('');
+                    setShowManualStudentModal(true);
+                  }}
+                  className="px-3 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg border border-emerald-600 flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                  title="Murid lupa bawa kartu QR? Cari nama murid langsung"
+                >
+                  <UserCheck className="w-3.5 h-3.5 text-emerald-200" />
+                  <span>Lupa Kartu QR</span>
+                </button>
+
+                {/* Input Cepat Siswi Haid Langsung di bawah Kamera */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setHaidFilterClass(selectedClass);
+                    setShowHaidModal(true);
+                  }}
+                  className="px-3 py-1.5 bg-pink-900/90 hover:bg-pink-800 text-pink-200 border border-pink-700/80 text-xs font-bold rounded-lg flex items-center gap-1.5 transition cursor-pointer"
+                  title="Catat siswi yang berhalangan sholat karena haid"
+                >
+                  <Heart className="w-3.5 h-3.5 text-pink-400 fill-current" />
+                  <span>🌸 Siswi Haid</span>
+                </button>
               </div>
 
               <div className="text-[11px] text-slate-400">
@@ -1686,6 +1776,19 @@ export const ScanQR: React.FC<ScanQRProps> = ({
                 Ketik NISN, atau gunakan alat pemindai Barcode Scanner USB / klik nama siswa
               </p>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setManualStudentFilterClass('Semua Kelas');
+                setManualStudentSearchQuery('');
+                setShowManualStudentModal(true);
+              }}
+              className="w-full py-2 px-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition cursor-pointer"
+            >
+              <UserCheck className="w-4 h-4 text-emerald-200" />
+              <span>Buka Pencarian Murid Lupa Kartu (Semua Kelas)</span>
+            </button>
 
             <form onSubmit={handleManualSubmit} className="flex gap-2">
               <input
@@ -2293,6 +2396,246 @@ export const ScanQR: React.FC<ScanQRProps> = ({
               <button
                 type="button"
                 onClick={() => setShowHaidModal(false)}
+                className="px-4 py-1.5 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 cursor-pointer text-xs"
+              >
+                Selesai / Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: PRESENSI MANUAL CEPAT (MURID LUPA KARTU QR) - LINTAS SEMUA KELAS */}
+      {showManualStudentModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-2xl border border-emerald-200 space-y-4 animate-fadeIn max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <span>Presensi Murid Lupa Kartu QR</span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                      Lintas Semua Kelas
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Pencarian cepat murid yang lupa membawa kartu fisik untuk kegiatan <strong className="text-emerald-700">{selectedActivity}</strong> (Masjid Al Hikmah)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowManualStudentModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Filter Kelas, Gender, dan Pencarian Nama */}
+            <div className="flex flex-col sm:flex-row gap-2 pt-1">
+              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs w-full sm:w-44">
+                <Filter className="w-3.5 h-3.5 text-slate-400" />
+                <label className="text-slate-600 font-bold">Kelas:</label>
+                <select
+                  value={manualStudentFilterClass}
+                  onChange={(e) => setManualStudentFilterClass(e.target.value)}
+                  className="bg-transparent font-bold text-slate-900 focus:outline-none cursor-pointer flex-1"
+                >
+                  <option value="Semua Kelas">Semua Kelas ({students.length})</option>
+                  {SCHOOL_CLASSES.map((cls) => (
+                    <option key={cls} value={cls}>Kelas {cls}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg p-1 text-xs shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setManualStudentFilterGender('ALL')}
+                  className={`px-2 py-1 rounded font-bold cursor-pointer transition ${
+                    manualStudentFilterGender === 'ALL' ? 'bg-emerald-700 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Semua
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setManualStudentFilterGender('L')}
+                  className={`px-2 py-1 rounded font-bold cursor-pointer transition ${
+                    manualStudentFilterGender === 'L' ? 'bg-sky-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Putra (L)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setManualStudentFilterGender('P')}
+                  className={`px-2 py-1 rounded font-bold cursor-pointer transition ${
+                    manualStudentFilterGender === 'P' ? 'bg-pink-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Putri (P)
+                </button>
+              </div>
+
+              <div className="relative flex-1">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  value={manualStudentSearchQuery}
+                  onChange={(e) => setManualStudentSearchQuery(e.target.value)}
+                  placeholder="Ketik nama murid, NISN, atau kelas..."
+                  autoFocus
+                  className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:bg-white"
+                />
+              </div>
+            </div>
+
+            {/* List Siswa */}
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[260px] max-h-[380px]">
+              {filteredManualStudents.length === 0 ? (
+                <div className="text-center py-10 text-xs text-slate-400">
+                  Tidak ditemukan siswa yang cocok dengan kata kunci &quot;{manualStudentSearchQuery}&quot;.
+                </div>
+              ) : (
+                filteredManualStudents.map((std) => {
+                  const todayStr = new Date().toISOString().slice(0, 10);
+                  const todayRec = recentAttendance.find(
+                    (a) => (a.studentId === std.id || a.studentNisn === std.nisn) && a.activity === selectedActivity && a.date === todayStr
+                  );
+                  const isRecorded = Boolean(todayRec);
+                  const status = todayRec?.status;
+
+                  return (
+                    <div
+                      key={std.id}
+                      className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition ${
+                        status === 'Hadir'
+                          ? 'bg-emerald-50/70 border-emerald-300'
+                          : status === 'Berhalangan'
+                          ? 'bg-pink-50/70 border-pink-300'
+                          : status === 'Terlambat'
+                          ? 'bg-purple-50/70 border-purple-300'
+                          : isRecorded
+                          ? 'bg-amber-50/70 border-amber-300'
+                          : 'bg-white hover:bg-slate-50 border-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-8 h-8 rounded-full text-xs font-black flex items-center justify-center shrink-0 ${
+                          std.gender === 'P' ? 'bg-pink-600 text-white' : 'bg-sky-600 text-white'
+                        }`}>
+                          {std.gender}
+                        </div>
+                        <div>
+                          <div className="font-bold text-xs text-slate-900 flex items-center gap-1.5 flex-wrap">
+                            <span>{std.name}</span>
+                            {isRecorded && (
+                              <span className={`text-[10px] px-2 py-0.2 rounded font-extrabold ${
+                                status === 'Hadir' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
+                                status === 'Berhalangan' ? 'bg-pink-100 text-pink-800 border border-pink-300' :
+                                status === 'Terlambat' ? 'bg-purple-100 text-purple-800' :
+                                'bg-amber-100 text-amber-800'
+                              }`}>
+                                {status === 'Berhalangan' ? '🌸 Berhalangan (Haid)' : `✓ ${status}`}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-500 font-mono">
+                            Kelas {std.className} · NISN: {std.nisn}
+                            {todayRec?.time && (
+                              <span className="ml-2 text-slate-500">· Jam: {todayRec.time} WIB</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action buttons per student */}
+                      <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStudentStatus(std, 'Hadir')}
+                          className={`px-2.5 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1 ${
+                            status === 'Hadir'
+                              ? 'bg-emerald-700 text-white shadow-xs'
+                              : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          }`}
+                          title="Tandai Hadir Sholat"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Hadir</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStudentStatus(std, 'Terlambat')}
+                          className={`px-2 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            status === 'Terlambat'
+                              ? 'bg-purple-700 text-white shadow-xs'
+                              : 'bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200'
+                          }`}
+                          title="Tandai Terlambat"
+                        >
+                          <span>Terlambat</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStudentStatus(std, 'Izin')}
+                          className={`px-2 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            status === 'Izin'
+                              ? 'bg-sky-700 text-white shadow-xs'
+                              : 'bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200'
+                          }`}
+                          title="Tandai Izin"
+                        >
+                          <span>Izin</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleToggleStudentStatus(std, 'Sakit')}
+                          className={`px-2 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                            status === 'Sakit'
+                              ? 'bg-amber-700 text-white shadow-xs'
+                              : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
+                          }`}
+                          title="Tandai Sakit"
+                        >
+                          <span>Sakit</span>
+                        </button>
+
+                        {std.gender === 'P' && (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStudentStatus(std, 'Berhalangan')}
+                            className={`px-2 py-1 text-xs font-bold rounded-lg transition cursor-pointer flex items-center gap-1 ${
+                              status === 'Berhalangan'
+                                ? 'bg-pink-600 text-white shadow-xs'
+                                : 'bg-pink-50 hover:bg-pink-100 text-pink-800 border border-pink-300'
+                            }`}
+                            title="Tandai Uzur Syar'i (Haid)"
+                          >
+                            <Heart className="w-3 h-3 fill-current" />
+                            <span>Haid</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span>Menampilkan: <strong>{filteredManualStudents.length}</strong> dari {students.length} murid</span>
+              <button
+                type="button"
+                onClick={() => setShowManualStudentModal(false)}
                 className="px-4 py-1.5 bg-slate-900 text-white font-bold rounded-lg hover:bg-slate-800 cursor-pointer text-xs"
               >
                 Selesai / Tutup

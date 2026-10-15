@@ -291,11 +291,25 @@ export default function App() {
   // Spreadsheet Sync Engine
   const triggerSpreadsheetSync = async (
     newAttendance?: AttendanceRecord[],
-    newDiscipline?: DisciplineRecord[]
+    newDiscipline?: DisciplineRecord[],
+    options?: { onlyUnsynced?: boolean }
   ) => {
     setIsSyncing(true);
-    const syncAttendance = newAttendance || attendance;
-    const syncDiscipline = newDiscipline || discipline;
+    let syncAttendance = newAttendance || attendance;
+    let syncDiscipline = newDiscipline || discipline;
+
+    if (options?.onlyUnsynced && !newAttendance) {
+      syncAttendance = attendance.filter((a) => !a.syncedToSpreadsheet);
+    }
+    if (options?.onlyUnsynced && !newDiscipline) {
+      syncDiscipline = discipline.filter((d) => !d.syncedToSpreadsheet);
+    }
+
+    if (syncAttendance.length === 0 && syncDiscipline.length === 0) {
+      setIsSyncing(false);
+      showToast('Seluruh data sudah berstatus terkirim ke Spreadsheet. Tidak ada antrean baru.');
+      return;
+    }
 
     const result = await spreadsheetService.syncToGoogleSheet(spreadsheetConfig, {
       attendance: syncAttendance,
@@ -306,16 +320,75 @@ export default function App() {
     setLastSyncResult(result);
 
     if (result.success) {
+      // Mark attendance as synced in state and storage
+      const syncedAttIds = new Set(syncAttendance.map((a) => a.id));
+      setAttendance((prev) =>
+        prev.map((a) => (syncedAttIds.has(a.id) ? { ...a, syncedToSpreadsheet: true } : a))
+      );
+      storageService.markAllAttendanceAsSynced();
+
+      // Mark discipline as synced in state and storage
+      const syncedDiscIds = new Set(syncDiscipline.map((d) => d.id));
+      setDiscipline((prev) =>
+        prev.map((d) => (syncedDiscIds.has(d.id) ? { ...d, syncedToSpreadsheet: true } : d))
+      );
+      storageService.markAllDisciplineAsSynced();
+
       const updatedConfig = {
         ...spreadsheetConfig,
         lastSyncTime: result.timestamp,
         totalSyncedRows: attendance.length + discipline.length,
       };
       setSpreadsheetConfig(updatedConfig);
-      showToast(result.message || 'Semua data berhasil dikirim dan disinkronkan ke Google Spreadsheet!');
+      showToast(result.message || 'Semua data berhasil dikirim dan ditandai terkirim ke Google Spreadsheet!');
     } else {
       showToast(result.message || 'Data tersimpan lokal. Silakan periksa koneksi Webhook Google Spreadsheet.');
     }
+  };
+
+  // Reset / Clear Data yang sudah berhasil dikirim ke Spreadsheet
+  const handleResetSyncedData = (action: 'clear_synced' | 'mark_all_synced' | 'mark_all_unsynced') => {
+    if (action === 'clear_synced') {
+      const initialAttCount = attendance.length;
+      const remainingAtt = attendance.filter((a) => !a.syncedToSpreadsheet);
+      const removedAttCount = initialAttCount - remainingAtt.length;
+
+      const initialDiscCount = discipline.length;
+      const remainingDisc = discipline.filter((d) => !d.syncedToSpreadsheet);
+      const removedDiscCount = initialDiscCount - remainingDisc.length;
+
+      setAttendance(remainingAtt);
+      setDiscipline(remainingDisc);
+      storageService.saveAttendance(remainingAtt);
+      storageService.saveDiscipline(remainingDisc);
+
+      showToast(`Antrean bersih! ${removedAttCount} presensi dan ${removedDiscCount} catatan disiplin yang sudah masuk Spreadsheet berhasil dibersihkan dari antrean lokal.`);
+    } else if (action === 'mark_all_synced') {
+      const updatedAtt = attendance.map((a) => ({ ...a, syncedToSpreadsheet: true }));
+      const updatedDisc = discipline.map((d) => ({ ...d, syncedToSpreadsheet: true }));
+      setAttendance(updatedAtt);
+      setDiscipline(updatedDisc);
+      storageService.saveAttendance(updatedAtt);
+      storageService.saveDiscipline(updatedDisc);
+
+      showToast(`Semua ${attendance.length} data presensi ditandai sebagai 'Sudah Terkirim ke Spreadsheet'. Pengiriman berikutnya hanya akan memproses data baru.`);
+    } else if (action === 'mark_all_unsynced') {
+      const updatedAtt = attendance.map((a) => ({ ...a, syncedToSpreadsheet: false }));
+      const updatedDisc = discipline.map((d) => ({ ...d, syncedToSpreadsheet: false }));
+      setAttendance(updatedAtt);
+      setDiscipline(updatedDisc);
+      storageService.saveAttendance(updatedAtt);
+      storageService.saveDiscipline(updatedDisc);
+
+      showToast('Status pengiriman direset. Semua data ditandai siap dikirim ulang ke Spreadsheet.');
+    }
+  };
+
+  // Delete single attendance record (e.g. from quick input cancellation)
+  const handleDeleteAttendance = (id: string) => {
+    setAttendance((prev) => prev.filter((a) => a.id !== id));
+    storageService.deleteAttendanceRecord(id);
+    showToast('Presensi siswa berhasil dibatalkan / dihapus.');
   };
 
   // If user is not logged in, render the Cover Front Page
@@ -352,6 +425,7 @@ export default function App() {
           rohisSession={rohisSession}
           onSwitchToGuru={handleSwitchToGuru}
           onSwitchToRohis={handleSwitchToRohis}
+          unsyncedCount={attendance.filter((a) => !a.syncedToSpreadsheet).length}
         />
 
         {/* Global Toast Notification */}
@@ -407,6 +481,10 @@ export default function App() {
           {userRole === 'guru' && activeTab === 'presensi-manual' && (
             <PresensiManual
               students={students}
+              recentAttendance={attendance}
+              onAddAttendance={handleAddAttendance}
+              onUpdateAttendance={handleUpdateAttendance}
+              onDeleteAttendance={handleDeleteAttendance}
               onBatchSaveAttendance={handleBatchSaveAttendance}
               onSyncSpreadsheet={() => triggerSpreadsheetSync()}
               isSyncing={isSyncing}
@@ -465,6 +543,8 @@ export default function App() {
               attendanceRecords={attendance}
               disciplineRecords={discipline}
               onManualSync={() => triggerSpreadsheetSync()}
+              onSyncOnlyUnsynced={() => triggerSpreadsheetSync(undefined, undefined, { onlyUnsynced: true })}
+              onResetSyncedData={handleResetSyncedData}
               isSyncing={isSyncing}
               lastSyncResult={lastSyncResult}
             />

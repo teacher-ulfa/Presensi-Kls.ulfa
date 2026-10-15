@@ -123,6 +123,31 @@ export const storageService = {
     storageService.saveAttendance(updated);
     return updated;
   },
+  deleteAttendanceRecord: (id: string): AttendanceRecord[] => {
+    const records = storageService.getAttendance();
+    const updated = records.filter((r) => r.id !== id);
+    storageService.saveAttendance(updated);
+    return updated;
+  },
+  markAllAttendanceAsSynced: (): AttendanceRecord[] => {
+    const records = storageService.getAttendance();
+    const updated = records.map((r) => ({ ...r, syncedToSpreadsheet: true }));
+    storageService.saveAttendance(updated);
+    return updated;
+  },
+  clearSyncedAttendance: (): AttendanceRecord[] => {
+    const records = storageService.getAttendance();
+    // Keep only records that have NOT been synced yet
+    const remaining = records.filter((r) => !r.syncedToSpreadsheet);
+    storageService.saveAttendance(remaining);
+    return remaining;
+  },
+  resetAllAttendanceSyncStatus: (synced: boolean): AttendanceRecord[] => {
+    const records = storageService.getAttendance();
+    const updated = records.map((r) => ({ ...r, syncedToSpreadsheet: synced }));
+    storageService.saveAttendance(updated);
+    return updated;
+  },
 
   // Discipline
   getDiscipline: (): DisciplineRecord[] => {
@@ -139,6 +164,24 @@ export const storageService = {
   addDisciplineRecord: (record: DisciplineRecord): DisciplineRecord[] => {
     const records = storageService.getDiscipline();
     const updated = [record, ...records];
+    storageService.saveDiscipline(updated);
+    return updated;
+  },
+  markAllDisciplineAsSynced: (): DisciplineRecord[] => {
+    const records = storageService.getDiscipline();
+    const updated = records.map((d) => ({ ...d, syncedToSpreadsheet: true }));
+    storageService.saveDiscipline(updated);
+    return updated;
+  },
+  clearSyncedDiscipline: (): DisciplineRecord[] => {
+    const records = storageService.getDiscipline();
+    const remaining = records.filter((d) => !d.syncedToSpreadsheet);
+    storageService.saveDiscipline(remaining);
+    return remaining;
+  },
+  resetAllDisciplineSyncStatus: (synced: boolean): DisciplineRecord[] => {
+    const records = storageService.getDiscipline();
+    const updated = records.map((d) => ({ ...d, syncedToSpreadsheet: synced }));
     storageService.saveDiscipline(updated);
     return updated;
   },
